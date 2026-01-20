@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Dependencies
 FROM base AS deps
@@ -33,3 +33,4 @@ USER nestjs
 EXPOSE 4000
 
 CMD ["node", "dist/main"]
+
