@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -16,10 +17,11 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: process.env.NEXT_PUBLIC_API_URL + '/:path*',
+        destination: API_URL + '/:path*',
       },
     ];
   },
 };
 
 module.exports = nextConfig;
+
