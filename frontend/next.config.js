@@ -1,12 +1,12 @@
 /** @type {import('next').NextConfig} */
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://72.62.71.97:4000';
 const nextConfig = {
   output: 'standalone',
   images: {
     remotePatterns: [
       {
         protocol: 'http',
-        hostname: 'localhost',
+        hostname: '72.62.71.97',
       },
       {
         protocol: 'https',

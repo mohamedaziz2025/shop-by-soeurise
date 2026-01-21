@@ -35,7 +35,7 @@ async function bootstrap() {
   );
 
   await app.listen(port);
-  console.log(`🚀 Soeurise API running on: http://localhost:${port}/${apiPrefix}`);
+  console.log(`🚀 Soeurise API running on: http://72.62.71.97:${port}/${apiPrefix}`);
 }
 
 bootstrap();
