@@ -36,10 +36,10 @@ services:
       NODE_ENV: production
       PORT: 4000
       MONGODB_URI: mongodb://admin:admin123@mongodb:27017/soeurise?authSource=admin
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production-2026}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-this-in-production-2026}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
       PLATFORM_COMMISSION_RATE: ${PLATFORM_COMMISSION_RATE:-20}
       FRONTEND_URL: http://localhost:3000
     depends_on:
@@ -62,7 +62,7 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
       NEXT_PUBLIC_APP_URL: http://localhost:3000
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
     depends_on:
       - backend
     networks:
