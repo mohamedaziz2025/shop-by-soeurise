@@ -36,8 +36,10 @@ services:
       NODE_ENV: production
       PORT: 4000
       MONGODB_URI: mongodb://admin:admin123@mongodb:27017/soeurise?authSource=admin
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production-2026}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-this-in-production-2026}
+      JWT_SECRET: ${JWT_SECRET:-f654c2c3fbddb7bd72594aba7c64294da011b9139dc47829406495760cb9340c58d7fde890b6f3c16c6ac72af2f7c390fe897a5657b188ac6ce16921790a028c}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-900}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-213571fde705cf0b62aee4a1a9e4ed45c94b4aef8877ff900221b6b49ffefdd6ef2d77aee9c8de42a9060624f491b4d8e2e9896e8a6664ccfba9e48146b51ebd}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-604800}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
       PLATFORM_COMMISSION_RATE: ${PLATFORM_COMMISSION_RATE:-20}
@@ -74,3 +76,4 @@ networks:
 
 volumes:
   mongodb_data:
+
