@@ -9,7 +9,7 @@ import * as bcrypt from 'bcryptjs';
 
 async function seedAdminIfNotExists(app) {
   try {
-    const userModel = app.get<Model<UserDocument>>(getModelToken(User.name));
+    const userModel = app.get(getModelToken(User.name)) as Model<UserDocument>;
     
     const existingAdmin = await userModel.findOne({ role: UserRole.ADMIN });
     if (existingAdmin) {
