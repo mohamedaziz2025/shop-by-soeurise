@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
@@ -9,7 +9,7 @@ import ModernLayout from '@/components/ModernLayout';
 import { Sparkles, LogIn, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, setAuth } = useAuthStore();
@@ -228,5 +228,19 @@ export default function LoginPage() {
         </motion.div>
       </div>
     </ModernLayout>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <ModernLayout showFooter={false}>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
+        </div>
+      </ModernLayout>
+    }>
+      <LoginPageContent />
+    </Suspense>
   );
 }

@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Mail, Loader2 } from 'lucide-react';
 
-export default function VerifyEmailPage() {
+function VerifyEmailPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -137,5 +137,24 @@ export default function VerifyEmailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-xl shadow-2xl p-8">
+            <div className="text-center">
+              <Loader2 className="w-16 h-16 mx-auto mb-4 text-blue-600 animate-spin" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Chargement...</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <VerifyEmailPageContent />
+    </Suspense>
   );
 }

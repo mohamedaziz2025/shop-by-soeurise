@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { CheckCircle, Package, Truck, Mail } from 'lucide-react';
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [order, setOrder] = useState<any>(null);
@@ -197,5 +197,17 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    }>
+      <OrderConfirmationPageContent />
+    </Suspense>
   );
 }

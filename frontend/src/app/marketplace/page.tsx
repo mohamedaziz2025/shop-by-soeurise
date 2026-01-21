@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api';
@@ -9,7 +9,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import ModernLayout from '@/components/ModernLayout';
 import { Search, SlidersHorizontal, X, Filter } from 'lucide-react';
 
-export default function MarketplacePage() {
+function MarketplacePageContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -327,5 +327,19 @@ export default function MarketplacePage() {
         </div>
       </div>
     </ModernLayout>
+  );
+}
+
+export default function MarketplacePage() {
+  return (
+    <Suspense fallback={
+      <ModernLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </ModernLayout>
+    }>
+      <MarketplacePageContent />
+    </Suspense>
   );
 }
