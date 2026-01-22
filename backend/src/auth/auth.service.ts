@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,6 +11,7 @@ import { RegisterDto, LoginDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
@@ -115,13 +116,26 @@ export class AuthService {
    */
   async refreshToken(refreshToken: string) {
     try {
+      this.logger.debug(`refreshToken called`);
+      this.logger.debug(`incoming refreshToken: ${refreshToken ? '[REDACTED]' : 'null'}`);
+
       const payload = await this.jwtService.verifyAsync(refreshToken, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       });
 
+      this.logger.debug(`refresh token payload: ${JSON.stringify(payload)}`);
+
       const user = await this.userModel.findById(payload.sub);
 
-      if (!user || user.refreshToken !== refreshToken) {
+      if (!user) {
+        this.logger.warn(`refresh failed: user not found (sub=${payload.sub})`);
+        throw new UnauthorizedException('Token invalide');
+      }
+
+      this.logger.debug(`stored refreshToken for user ${user._id}: ${user.refreshToken ? '[REDACTED]' : 'null'}`);
+
+      if (user.refreshToken !== refreshToken) {
+        this.logger.warn(`refresh failed: token mismatch for user ${user._id}`);
         throw new UnauthorizedException('Token invalide');
       }
 
@@ -129,8 +143,11 @@ export class AuthService {
       user.refreshToken = tokens.refreshToken;
       await user.save();
 
+      this.logger.log(`refresh success for user ${user._id}`);
+
       return tokens;
-    } catch {
+    } catch (err) {
+      this.logger.warn(`refreshToken error: ${err?.message || err}`);
       throw new UnauthorizedException('Token invalide ou expiré');
     }
   }
