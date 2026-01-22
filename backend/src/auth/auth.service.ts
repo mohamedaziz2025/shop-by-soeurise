@@ -22,12 +22,15 @@ export class AuthService {
    * Inscription d'un nouvel utilisateur
    */
   async register(registerDto: RegisterDto) {
+    this.logger.debug(`register attempt for email: ${registerDto.email}`);
+    
     // Vérifier si l'email existe déjà
     const existingUser = await this.userModel.findOne({
       email: registerDto.email,
     });
 
     if (existingUser) {
+      this.logger.warn(`register failed: email already exists (${registerDto.email})`);
       throw new UnauthorizedException('Cet email est déjà utilisé');
     }
 
@@ -47,6 +50,7 @@ export class AuthService {
     });
 
     await user.save();
+    this.logger.log(`user registered: ${registerDto.email} (ID: ${user._id})`);
 
     // TODO: Envoyer l'email de vérification
     await this.sendVerificationEmail(user.email, emailVerificationToken);
@@ -69,11 +73,16 @@ export class AuthService {
    * Connexion
    */
   async login(loginDto: LoginDto) {
+    this.logger.debug(`login attempt for email: ${loginDto.email}`);
+    
     const user = await this.userModel.findOne({ email: loginDto.email });
 
     if (!user) {
+      this.logger.warn(`login failed: user not found (email: ${loginDto.email})`);
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
+
+    this.logger.debug(`user found: ${user._id}, verified: ${user.emailVerified}, status: ${user.status}`);
 
     // Vérifier le mot de passe
     const isPasswordValid = await bcrypt.compare(
@@ -82,18 +91,25 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
+      this.logger.warn(`login failed: invalid password for ${loginDto.email}`);
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
+    this.logger.debug(`password valid for ${loginDto.email}`);
+
     // Vérifier si l'email est vérifié
     if (!user.emailVerified) {
+      this.logger.warn(`login failed: email not verified for ${loginDto.email}`);
       throw new UnauthorizedException('Veuillez vérifier votre email avant de vous connecter. Vérifiez votre boîte de réception.');
     }
 
     // Vérifier le statut du compte
     if (user.status === 'SUSPENDED') {
+      this.logger.warn(`login failed: account suspended for ${loginDto.email}`);
       throw new UnauthorizedException('Votre compte a été suspendu');
     }
+
+    this.logger.log(`login success for ${loginDto.email}`);
 
     // Mettre à jour la date de dernière connexion
     user.lastLoginAt = new Date();
