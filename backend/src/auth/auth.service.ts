@@ -308,6 +308,9 @@ export class AuthService {
   private async sendVerificationEmail(email: string, token: string) {
     const verificationUrl = `${this.configService.get('FRONTEND_URL')}/verify-email?token=${token}`;
 
+    this.logger.debug(`sendVerificationEmail: preparing email for ${email}`);
+    this.logger.debug(`SMTP config - host: ${this.configService.get('MAIL_HOST')}, port: ${this.configService.get('MAIL_PORT')}, user: ${this.configService.get('MAIL_USER')}`);
+
     // Créer le transporteur nodemailer
     const transporter = nodemailer.createTransport({
       host: this.configService.get('MAIL_HOST'),
@@ -344,10 +347,11 @@ export class AuthService {
     };
 
     try {
+      this.logger.debug(`sendVerificationEmail: connecting to SMTP host ${this.configService.get('MAIL_HOST')}`);
       await transporter.sendMail(mailOptions);
-      console.log(`📧 Email de vérification envoyé à ${email}`);
+      this.logger.log(`✓ Email de vérification envoyé à ${email}`);
     } catch (error) {
-      console.error(`❌ Erreur lors de l'envoi de l'email à ${email}:`, error);
+      this.logger.error(`✗ Erreur lors de l'envoi de l'email à ${email}: ${error?.message || error}`);
       // Ne pas throw l'erreur pour ne pas bloquer l'inscription
       // L'utilisateur pourra utiliser la fonctionnalité de renvoi
     }
