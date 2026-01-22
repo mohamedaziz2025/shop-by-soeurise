@@ -28,6 +28,7 @@ export default function SellerSettingsPage() {
     description: '',
     logo: '',
     banner: '',
+    categories: [] as string[],
     address: '',
     city: '',
     postalCode: '',
@@ -36,6 +37,8 @@ export default function SellerSettingsPage() {
     returnPolicy: '',
     shippingPolicy: '',
   });
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -62,6 +65,7 @@ export default function SellerSettingsPage() {
           description: shop.description || '',
           logo: shop.logo || '',
           banner: shop.banner || '',
+          categories: shop.categories || [],
           address: shop.address || '',
           city: shop.city || '',
           postalCode: shop.postalCode || '',
@@ -70,6 +74,7 @@ export default function SellerSettingsPage() {
           returnPolicy: shop.returnPolicy || '',
           shippingPolicy: shop.shippingPolicy || '',
         });
+        if (shop.logo) setLogoPreview(shop.logo);
       }
     } catch (error) {
       console.error('Erreur chargement boutique:', error);
@@ -102,8 +107,14 @@ export default function SellerSettingsPage() {
     setMessage(null);
 
     try {
+      // Upload logo if changed
+      if (logoFile) {
+        const uploaded = await api.uploadShopLogo(logoFile);
+        shopData.logo = uploaded.logo;
+      }
       await api.updateShop(shopData);
       setMessage({ type: 'success', text: 'Boutique mise à jour avec succès' });
+      await fetchShop();
     } catch (error: any) {
       setMessage({
         type: 'error',
@@ -111,6 +122,16 @@ export default function SellerSettingsPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setLogoPreview(reader.result as string);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -317,6 +338,65 @@ export default function SellerSettingsPage() {
             <form onSubmit={handleShopSubmit} className="max-w-2xl">
               <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
                 <h2 className="text-xl font-semibold mb-4">Informations de la boutique</h2>
+
+                {/* Logo Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Upload className="w-4 h-4 inline mr-1" />
+                    Logo de la boutique
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {logoPreview && (
+                      <div className="w-24 h-24 rounded-xl border-2 border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50">
+                        <img src={logoPreview.startsWith('http') ? logoPreview : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1','')}${logoPreview}`} alt="Logo" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg,image/svg+xml"
+                      onChange={handleLogoChange}
+                      className="flex-1 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Format: PNG, JPG, SVG (max 2MB)</p>
+                </div>
+
+                {/* Categories */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Catégorie principale *
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-pink-500 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={shopData.categories.includes('Mode')}
+                        onChange={(e) => {
+                          const cats = e.target.checked
+                            ? [...shopData.categories, 'Mode']
+                            : shopData.categories.filter((c) => c !== 'Mode');
+                          setShopData({ ...shopData, categories: cats });
+                        }}
+                        className="w-4 h-4 text-pink-600"
+                      />
+                      <span className="font-medium">Mode</span>
+                    </label>
+                    <label className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-pink-500 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={shopData.categories.includes('Cosmétiques')}
+                        onChange={(e) => {
+                          const cats = e.target.checked
+                            ? [...shopData.categories, 'Cosmétiques']
+                            : shopData.categories.filter((c) => c !== 'Cosmétiques');
+                          setShopData({ ...shopData, categories: cats });
+                        }}
+                        className="w-4 h-4 text-pink-600"
+                      />
+                      <span className="font-medium">Cosmétiques</span>
+                    </label>
+                  </div>
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">

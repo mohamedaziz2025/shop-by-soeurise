@@ -19,6 +19,7 @@ import {
 import heroImg from '@/images-vitrine/femme-hijabi.jpg';
 import imgPretAPorter from '@/images-vitrine/pret-a-porter.jpg';
 import imgAccessoires from '@/images-vitrine/Accessoires.png';
+import PartnerLogos from '@/components/PartnerLogos';
 const imgBienEtre = new URL('../images-vitrine/routine bien-etre.jfif', import.meta.url).href;
 
 interface MagneticButtonProps {
@@ -275,17 +276,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Logos Marquee */}
-      <div className="py-12 bg-white border-y border-pink-50 overflow-hidden">
-        <div className="marquee flex gap-16 items-center">
-          {[...Array(12)].map((_, i) => (
-            <div key={i} className="flex items-center gap-3 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition">
-              <div className="w-8 h-8 rounded-lg bg-gray-100" />
-              <span className="text-lg font-black text-gray-900 tracking-tighter uppercase">Partner</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Logos Marquee - Partenaires */}
+      <PartnerLogos />
 
       {/* Le Journal: removed as requested */}
 

@@ -246,10 +246,10 @@ export class CartService {
       if (!itemsByShop.has(shopId)) {
         itemsByShop.set(shopId, {
           shopId,
-          shopInfo: item.shopId,
+          shop: item.shopId, // Populated shop document
           items: [],
           subtotal: 0,
-          shippingCost: 0,
+          shipping: 0,
           total: 0,
         });
       }
@@ -257,7 +257,16 @@ export class CartService {
       const shopCart = itemsByShop.get(shopId);
       const itemTotal = item.price * item.quantity;
 
-      shopCart.items.push(item);
+      // Transform item to include full product data
+      shopCart.items.push({
+        product: item.productId, // Populated product document
+        variant: item.variantId,
+        quantity: item.quantity,
+        price: item.price,
+        subtotal: itemTotal,
+        productSnapshot: item.productSnapshot,
+      });
+      
       shopCart.subtotal += itemTotal;
     }
 
@@ -265,7 +274,7 @@ export class CartService {
     const shopCarts = Array.from(itemsByShop.values());
 
     for (const shopCart of shopCarts) {
-      const shippingConfig = (shopCart.shopInfo as any).shippingConfig;
+      const shippingConfig = (shopCart.shop as any).shippingConfig;
 
       if (shippingConfig?.enabled) {
         // Livraison gratuite si seuil atteint
@@ -273,35 +282,38 @@ export class CartService {
           shippingConfig.freeShippingThreshold &&
           shopCart.subtotal >= shippingConfig.freeShippingThreshold
         ) {
-          shopCart.shippingCost = 0;
+          shopCart.shipping = 0;
         } else if (shippingConfig.flatRate) {
-          shopCart.shippingCost = shippingConfig.flatRate;
+          shopCart.shipping = shippingConfig.flatRate;
         }
 
         // Appliquer le plafond si défini
         if (
           shippingConfig.maxShippingCost &&
-          shopCart.shippingCost > shippingConfig.maxShippingCost
+          shopCart.shipping > shippingConfig.maxShippingCost
         ) {
-          shopCart.shippingCost = shippingConfig.maxShippingCost;
+          shopCart.shipping = shippingConfig.maxShippingCost;
         }
       }
 
-      shopCart.total = shopCart.subtotal + shopCart.shippingCost;
+      shopCart.total = shopCart.subtotal + shopCart.shipping;
     }
 
     // Calculer le total global
     const globalSubtotal = shopCarts.reduce((sum, sc) => sum + sc.subtotal, 0);
-    const globalShipping = shopCarts.reduce((sum, sc) => sum + sc.shippingCost, 0);
+    const globalShipping = shopCarts.reduce((sum, sc) => sum + sc.shipping, 0);
     const globalTotal = globalSubtotal + globalShipping;
 
     return {
       items: cart.items,
       itemsByShop: shopCarts,
-      totalItems: cart.items.reduce((sum, item) => sum + item.quantity, 0),
-      subtotal: globalSubtotal,
-      shippingTotal: globalShipping,
-      total: globalTotal,
+      totals: {
+        subtotal: globalSubtotal,
+        shipping: globalShipping,
+        total: globalTotal,
+        itemCount: cart.items.length,
+        shopCount: shopCarts.length,
+      },
     };
   }
 }

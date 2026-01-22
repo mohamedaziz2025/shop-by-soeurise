@@ -6,6 +6,9 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument, UserRole, UserStatus } from './schemas/user.schema';
 import * as bcrypt from 'bcryptjs';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import * as fs from 'fs';
 
 const logger = new Logger('Bootstrap');
 
@@ -43,7 +46,7 @@ async function seedAdminIfNotExists(app) {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Configuration globale
   const configService = app.get(ConfigService);
@@ -74,6 +77,17 @@ async function bootstrap() {
       },
     }),
   );
+
+  // Static assets for uploads
+  const uploadDir = join(process.cwd(), 'uploads');
+  const logosDir = join(uploadDir, 'logos');
+  try {
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    if (!fs.existsSync(logosDir)) fs.mkdirSync(logosDir, { recursive: true });
+  } catch (e) {
+    logger.error(`Error creating upload directories: ${e}`);
+  }
+  app.useStaticAssets(uploadDir, { prefix: '/uploads' });
 
   await app.listen(port);
   logger.log(`✓ Soeurise API running on: http://72.62.71.97:${port}/${apiPrefix}`);

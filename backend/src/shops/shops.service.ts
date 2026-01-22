@@ -349,4 +349,14 @@ export class ShopsService {
       returningCustomers: 0, // TODO: Calculer le vrai taux de clients récurrents
     };
   }
+
+  /**
+   * Liste des partenaires (boutiques actives avec logo)
+   */
+  async getPartners() {
+    return this.shopModel
+      .find({ status: ShopStatus.ACTIVE, logo: { $exists: true, $ne: null } })
+      .select('name slug logo categories')
+      .sort({ isFeatured: -1, createdAt: -1 });
+  }
 }

@@ -16,6 +16,11 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '../schemas/user.schema';
+import { UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import * as fs from 'fs';
 
 @Controller('shops')
 export class ShopsController {
@@ -37,6 +42,11 @@ export class ShopsController {
   @Get('slug/:slug')
   async findBySlug(@Param('slug') slug: string) {
     return this.shopsService.findBySlug(slug);
+  }
+
+  @Get('partners')
+  async listPartners() {
+    return this.shopsService.getPartners();
   }
 
   @Get(':id')
@@ -71,6 +81,36 @@ export class ShopsController {
   @Roles(UserRole.SELLER)
   async update(@CurrentUser() user: any, @Body() updateShopDto: UpdateShopDto) {
     return this.shopsService.update(user.userId, updateShopDto);
+  }
+
+  @Post('seller/logo')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SELLER)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const dir = join(process.cwd(), 'uploads', 'logos');
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          cb(null, dir);
+        },
+        filename: (req, file, cb) => {
+          const name = file.originalname
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9\-\.]/g, '');
+          const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+          cb(null, `${unique}${extname(name)}`);
+        },
+      }),
+      limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+    })
+  )
+  async uploadLogo(@CurrentUser() user: any, @UploadedFile() file: Express.Multer.File) {
+    const publicUrl = `/uploads/logos/${file.filename}`;
+    return this.shopsService.update(user.userId, { logo: publicUrl } as UpdateShopDto);
   }
 
   @Delete('seller/my-shop')

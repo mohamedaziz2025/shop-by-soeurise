@@ -121,6 +121,34 @@ class ApiClient {
     return data;
   }
 
+  async uploadShopLogo(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await this.client.post('/shops/seller/logo', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  }
+
+  async getPartners() {
+    const { data } = await this.client.get('/shops/partners');
+    return data;
+  }
+
+  async uploadShopLogo(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await this.client.post('/shops/seller/logo', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  }
+
+  async getPartners() {
+    const { data } = await this.client.get('/shops/partners');
+    return data;
+  }
+
   // Products
   async getProducts(filters?: any) {
     const { data } = await this.client.get('/products', { params: filters });

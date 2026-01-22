@@ -55,6 +55,7 @@ export class Cart {
   // Dernière mise à jour
   @Prop({ default: Date.now })
   lastActivityAt: Date;
+  static items: any;
 }
 
 export const CartSchema = SchemaFactory.createForClass(Cart);
