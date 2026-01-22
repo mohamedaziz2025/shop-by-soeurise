@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { getModelToken } from '@nestjs/mongoose';
@@ -7,23 +7,26 @@ import { Model } from 'mongoose';
 import { User, UserDocument, UserRole, UserStatus } from './schemas/user.schema';
 import * as bcrypt from 'bcryptjs';
 
+const logger = new Logger('Bootstrap');
+
 async function seedAdminIfNotExists(app) {
   try {
+    logger.debug('seedAdminIfNotExists: starting admin check');
     const userModel = app.get(getModelToken(User.name)) as Model<UserDocument>;
     
     const existingAdmin = await userModel.findOne({ role: UserRole.ADMIN });
     if (existingAdmin) {
-      console.log('✅ Admin existe déjà:', existingAdmin.email);
+      logger.log(`✓ Admin already exists: ${existingAdmin.email} (verified: ${existingAdmin.emailVerified}, status: ${existingAdmin.status})`);
       return;
     }
 
-    console.log('🌱 Création de l\'admin par défaut...');
+    logger.log('Creating default admin user...');
     const hashedPassword = await bcrypt.hash('Admin123!', 12);
 
     const adminUser = new userModel({
       firstName: 'Admin',
-      lastName: 'Soeurise',
-      email: 'admin@soeurise.com',
+      lastName: 'Shop By Soeurise',
+      email: 'admin@shopbysoeurise.com',
       password: hashedPassword,
       role: UserRole.ADMIN,
       status: UserStatus.ACTIVE,
@@ -31,10 +34,11 @@ async function seedAdminIfNotExists(app) {
       phone: '+33123456789',
     });
 
-    await adminUser.save();
-    console.log('✅ Admin créé: admin@soeurise.com / Admin123!');
+    const savedAdmin = await adminUser.save();
+    logger.log(`✓ Admin user created successfully: admin@soeurise.com (ID: ${savedAdmin._id})`);
+    logger.debug(`Admin details - verified: ${savedAdmin.emailVerified}, status: ${savedAdmin.status}, role: ${savedAdmin.role}`);
   } catch (error) {
-    console.error('❌ Erreur seed admin:', error.message);
+    logger.error(`✗ Error seeding admin: ${error?.message || error}`);
   }
 }
 
@@ -45,6 +49,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get('PORT') || 4000;
   const apiPrefix = configService.get('API_PREFIX') || 'api/v1';
+
+  logger.log(`Initializing Soeurise API on port ${port}`);
 
   // CORS - Configuration permissive pour le développement
   app.enableCors({
@@ -70,7 +76,7 @@ async function bootstrap() {
   );
 
   await app.listen(port);
-  console.log(`🚀 Soeurise API running on: http://72.62.71.97:${port}/${apiPrefix}`);
+  logger.log(`✓ Soeurise API running on: http://72.62.71.97:${port}/${apiPrefix}`);
   
   // Seed admin si nécessaire
   await seedAdminIfNotExists(app);
