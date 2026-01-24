@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://72.62.71.97:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://72.62.71.97:4000/api/v1';
 const nextConfig = {
   output: 'standalone',
   images: {

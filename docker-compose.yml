@@ -43,7 +43,7 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
       PLATFORM_COMMISSION_RATE: ${PLATFORM_COMMISSION_RATE:-20}
-      FRONTEND_URL: http://72.62.71.97:3000
+      FRONTEND_URL: http://frontend:3000
     depends_on:
       - mongodb
     networks:

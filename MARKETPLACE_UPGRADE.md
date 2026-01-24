@@ -12,7 +12,7 @@
 **Frontend:**
 - Added logo upload UI in seller settings with preview
 - Integrated file upload to `api.uploadShopLogo(file)`
-- Logo displays correctly from `http://72.62.71.97:4000/uploads/logos/...`
+- Logo displays correctly from `http://IP:4000/uploads/logos/...`
 
 ---
 
