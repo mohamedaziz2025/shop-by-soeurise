@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PassportModule } from '@nestjs/passport';
+import { AuthModule } from '../auth/auth.module';
 import { PaymentsService } from './payments.service';
 import { PaymentsController } from './payments.controller';
 import { Payment, PaymentSchema } from '../schemas/payment.schema';
@@ -9,6 +11,8 @@ import { SellerProfile, SellerProfileSchema } from '../schemas/seller-profile.sc
 
 @Module({
   imports: [
+    AuthModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     MongooseModule.forFeature([
       { name: Payment.name, schema: PaymentSchema },
       { name: Order.name, schema: OrderSchema },
