@@ -49,19 +49,7 @@ export class ShopsController {
     return this.shopsService.getPartners();
   }
 
-  @Get(':id')
-  async findById(@Param('id') id: string) {
-    return this.shopsService.findById(id);
-  }
-
   // Routes SELLER
-  @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SELLER, UserRole.CLIENT)
-  async create(@CurrentUser() user: any, @Body() createShopDto: CreateShopDto) {
-    return this.shopsService.create(user.userId, createShopDto);
-  }
-
   @Get('seller/my-shop')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SELLER)
@@ -74,6 +62,18 @@ export class ShopsController {
   @Roles(UserRole.SELLER)
   async getSellerStats(@CurrentUser() user: any) {
     return this.shopsService.getSellerStats(user.userId);
+  }
+
+  @Get(':id')
+  async findById(@Param('id') id: string) {
+    return this.shopsService.findById(id);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SELLER, UserRole.CLIENT)
+  async create(@CurrentUser() user: any, @Body() createShopDto: CreateShopDto) {
+    return this.shopsService.create(user.userId, createShopDto);
   }
 
   @Put('seller/my-shop')
