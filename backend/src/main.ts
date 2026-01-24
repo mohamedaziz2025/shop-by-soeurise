@@ -29,7 +29,7 @@ async function seedAdminIfNotExists(app) {
     const adminUser = new userModel({
       firstName: 'Admin',
       lastName: 'Shop By Soeurise',
-      email: 'admin@shopbysoeurise.com',
+      email: 'admin2@shopbysoeurise.com',
       password: hashedPassword,
       role: UserRole.ADMIN,
       status: UserStatus.ACTIVE,
