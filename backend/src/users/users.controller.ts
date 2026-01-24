@@ -17,7 +17,6 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '../schemas/user.schema';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

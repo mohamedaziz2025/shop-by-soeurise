@@ -51,15 +51,11 @@ export class ShopsController {
 
   // Routes SELLER
   @Get('seller/my-shop')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SELLER)
   async getMyShop(@CurrentUser() user: any) {
     return this.shopsService.findBySellerId(user.userId);
   }
 
   @Get('seller/stats')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SELLER)
   async getSellerStats(@CurrentUser() user: any) {
     return this.shopsService.getSellerStats(user.userId);
   }
@@ -70,22 +66,16 @@ export class ShopsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SELLER, UserRole.CLIENT)
   async create(@CurrentUser() user: any, @Body() createShopDto: CreateShopDto) {
     return this.shopsService.create(user.userId, createShopDto);
   }
 
   @Put('seller/my-shop')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SELLER)
   async update(@CurrentUser() user: any, @Body() updateShopDto: UpdateShopDto) {
     return this.shopsService.update(user.userId, updateShopDto);
   }
 
   @Post('seller/logo')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SELLER)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -114,30 +104,22 @@ export class ShopsController {
   }
 
   @Delete('seller/my-shop')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SELLER)
   async delete(@CurrentUser() user: any) {
     return this.shopsService.delete(user.userId);
   }
 
   // Routes ADMIN
   @Put(':id/status')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
   async updateStatus(@Param('id') id: string, @Body('status') status: string) {
     return this.shopsService.updateStatus(id, status);
   }
 
   @Put(':id/featured')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
   async toggleFeatured(@Param('id') id: string) {
     return this.shopsService.toggleFeatured(id);
   }
 
   @Put(':id/compliance')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
   async setCompliance(
     @Param('id') id: string,
     @Body() body: { isCompliant: boolean; reason?: string },

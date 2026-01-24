@@ -18,7 +18,6 @@ import { UserRole } from '../schemas/user.schema';
 import { OrderStatus } from '../schemas/order.schema';
 
 @Controller('orders')
-@UseGuards(JwtAuthGuard)
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
