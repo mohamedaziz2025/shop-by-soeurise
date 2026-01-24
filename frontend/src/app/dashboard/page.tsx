@@ -86,7 +86,7 @@ export default function UserDashboardPage() {
       <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo-soeurise/logo-main.svg" alt="Shop By Soeurise" className="h-8" />
+            <img src="/logo-soeurise/logo-soeurise.svg" alt="Shop By Soeurise" className="h-8" />
           </Link>
           <nav className="flex items-center gap-6">
             <Link href="/marketplace" className="text-gray-600 hover:text-gray-900">
