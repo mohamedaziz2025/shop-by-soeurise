@@ -5,12 +5,16 @@ import { AuthModule } from '../auth/auth.module';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User, UserSchema } from '../schemas/user.schema';
+import { Product, ProductSchema } from '../schemas/product.schema';
 
 @Module({
   imports: [
     AuthModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Product.name, schema: ProductSchema },
+    ]),
   ],
   controllers: [UsersController],
   providers: [UsersService],

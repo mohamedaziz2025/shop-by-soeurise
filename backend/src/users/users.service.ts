@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from '../schemas/user.schema';
+import { Product, ProductDocument } from '../schemas/product.schema';
 import { UpdateUserDto, ChangePasswordDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Product.name) private productModel: Model<ProductDocument>,
   ) {}
 
   /**
@@ -132,5 +134,71 @@ export class UsersService {
     }
 
     return user.toJSON();
+  }
+
+  /**
+   * Récupérer les favoris d'un utilisateur
+   */
+  async getFavorites(userId: string) {
+    const user = await this.userModel
+      .findById(userId)
+      .populate('favorites')
+      .select('favorites');
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    return user.favorites || [];
+  }
+
+  /**
+   * Ajouter un produit aux favoris
+   */
+  async addToFavorites(userId: string, productId: string) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    const product = await this.productModel.findById(productId);
+
+    if (!product) {
+      throw new NotFoundException('Produit introuvable');
+    }
+
+    if (!user.favorites) {
+      user.favorites = [];
+    }
+
+    if (user.favorites.includes(productId)) {
+      throw new BadRequestException('Produit déjà dans les favoris');
+    }
+
+    user.favorites.push(productId);
+    await user.save();
+
+    return { message: 'Produit ajouté aux favoris', favorites: user.favorites };
+  }
+
+  /**
+   * Retirer un produit des favoris
+   */
+  async removeFromFavorites(userId: string, productId: string) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    if (!user.favorites || !user.favorites.includes(productId)) {
+      throw new BadRequestException('Produit non trouvé dans les favoris');
+    }
+
+    user.favorites = user.favorites.filter((id) => id.toString() !== productId);
+    await user.save();
+
+    return { message: 'Produit retiré des favoris', favorites: user.favorites };
   }
 }

@@ -62,6 +62,10 @@ export class User {
   // Pour les vendeurs - référence au profil vendeur
   @Prop({ type: 'ObjectId', ref: 'SellerProfile' })
   sellerProfile?: string;
+
+  // Liste des produits favoris de l'utilisateur
+  @Prop({ type: [{ type: 'ObjectId', ref: 'Product' }], default: [] })
+  favorites?: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

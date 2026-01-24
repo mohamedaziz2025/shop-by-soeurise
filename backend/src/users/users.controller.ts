@@ -26,6 +26,27 @@ export class UsersController {
     return this.usersService.findById(user.userId);
   }
 
+  @Get('favorites')
+  async getFavorites(@CurrentUser() user: any) {
+    return this.usersService.getFavorites(user.userId);
+  }
+
+  @Put('favorites/:productId')
+  async addToFavorites(
+    @CurrentUser() user: any,
+    @Param('productId') productId: string,
+  ) {
+    return this.usersService.addToFavorites(user.userId, productId);
+  }
+
+  @Delete('favorites/:productId')
+  async removeFromFavorites(
+    @CurrentUser() user: any,
+    @Param('productId') productId: string,
+  ) {
+    return this.usersService.removeFromFavorites(user.userId, productId);
+  }
+
   @Put('profile')
   async updateProfile(
     @CurrentUser() user: any,
