@@ -50,7 +50,7 @@ function VerifyEmailPageContent() {
         <div className="text-center mb-8">
           <Link href="/">
             <Image
-              src="/logo-soeurise/logo-main.svg"
+              src="/logo-soeurise/logo_soeurise.jpg"
               alt="Shop By Soeurise"
               width={150}
               height={50}

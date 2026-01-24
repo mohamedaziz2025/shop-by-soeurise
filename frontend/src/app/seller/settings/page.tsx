@@ -1,16 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Save, Store, User, Mail, Phone, MapPin, Upload } from 'lucide-react';
 
 export default function SellerSettingsPage() {
-  const { user, setAuth } = useAuthStore();
+  const { user, setAuth, isAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [activeTab, setActiveTab] = useState('profile');
+  const router = useRouter();
 
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -41,6 +43,10 @@ export default function SellerSettingsPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     if (user) {
       setProfileData({
         firstName: user.firstName || '',
@@ -54,7 +60,7 @@ export default function SellerSettingsPage() {
       });
     }
     fetchShop();
-  }, [user]);
+  }, [user, isAuthenticated]);
 
   const fetchShop = async () => {
     try {
@@ -141,7 +147,7 @@ export default function SellerSettingsPage() {
         {/* Sidebar */}
         <aside className="w-64 bg-white border-r min-h-screen">
           <div className="p-6">
-            <img src="/logo-soeurise/logo-main.svg" alt="Shop By Soeurise" className="h-8 mb-6" />
+            <img src="/logo-soeurise/logo_soeurise.jpg" alt="Shop By Soeurise" className="h-8 mb-6" />
             <nav className="space-y-2">
               <a href="/seller/dashboard" className="block px-4 py-2 hover:bg-gray-100 rounded-lg">
                 📊 Dashboard

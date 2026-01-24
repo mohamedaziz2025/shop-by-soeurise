@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/store/auth';
 import { formatPrice, formatDate } from '@/lib/utils';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Package, Truck, CheckCircle, XCircle } from 'lucide-react';
@@ -9,10 +11,16 @@ import { Package, Truck, CheckCircle, XCircle } from 'lucide-react';
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     fetchOrders();
-  }, []);
+  }, [isAuthenticated]);
 
   const fetchOrders = async () => {
     try {

@@ -3,16 +3,22 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/store/auth';
 import Link from 'next/link';
 
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     loadFavorites();
-  }, []);
+  }, [isAuthenticated]);
 
   const loadFavorites = async () => {
     try {
