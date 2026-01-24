@@ -30,7 +30,7 @@ export default function FavoritesPage() {
 
   const removeFromFavorites = async (productId: string) => {
     try {
-      await api.client.delete(`/users/favorites/${productId}`);
+      await api.removeFromFavorites(productId);
       setFavorites(favorites.filter(f => f._id !== productId));
     } catch (error) {
       console.error('Erreur suppression favori:', error);

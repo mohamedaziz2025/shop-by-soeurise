@@ -17,8 +17,8 @@ export default function ForgotPasswordPage() {
     setMessage('');
 
     try {
-      const response = await api.client.post('/auth/forgot-password', { email });
-      setMessage(response.data.message || 'Un email de réinitialisation a été envoyé.');
+      const response = await api.forgotPassword(email);
+      setMessage(response.message || 'Un email de réinitialisation a été envoyé.');
       setEmail('');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Une erreur est survenue');

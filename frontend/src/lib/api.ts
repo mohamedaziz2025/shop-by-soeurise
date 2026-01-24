@@ -305,6 +305,21 @@ class ApiClient {
     return data;
   }
 
+  async addToFavorites(productId: string) {
+    const { data } = await this.client.put(`/users/favorites/${productId}`);
+    return data;
+  }
+
+  async removeFromFavorites(productId: string) {
+    const { data } = await this.client.delete(`/users/favorites/${productId}`);
+    return data;
+  }
+
+  async forgotPassword(email: string) {
+    const { data } = await this.client.post('/auth/forgot-password', { email });
+    return data;
+  }
+
   async updateShop(shopData: any) {
     return this.updateMyShop(shopData);
   }
