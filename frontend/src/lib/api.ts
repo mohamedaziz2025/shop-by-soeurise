@@ -320,6 +320,11 @@ class ApiClient {
     return data;
   }
 
+  async resetPassword(token: string, newPassword: string) {
+    const { data } = await this.client.post('/auth/reset-password', { token, newPassword });
+    return data;
+  }
+
   async updateShop(shopData: any) {
     return this.updateMyShop(shopData);
   }

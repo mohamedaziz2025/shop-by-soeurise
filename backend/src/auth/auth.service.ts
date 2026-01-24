@@ -37,27 +37,29 @@ export class AuthService {
     // Hash du mot de passe
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    // Générer un token de vérification d'email
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    // Générer un token de vérification d'email (désactivé)
+    // const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 
-    // Créer l'utilisateur avec email non vérifié
+    // Créer l'utilisateur avec email vérifié par défaut (SMTP désactivé)
     const user = new this.userModel({
       ...registerDto,
       password: hashedPassword,
-      emailVerified: false,
-      emailVerificationToken,
-      status: 'PENDING_VERIFICATION', // Statut en attente de vérification
+      emailVerified: true, // Désactivation de la vérification email
+      // emailVerificationToken,
+      status: 'ACTIVE', // Compte actif immédiatement
     });
 
     await user.save();
     this.logger.log(`user registered: ${registerDto.email} (ID: ${user._id})`);
 
-    // TODO: Envoyer l'email de vérification
-    await this.sendVerificationEmail(user.email, emailVerificationToken);
+    // Envoi d'email désactivé
+    // await this.sendVerificationEmail(user.email, emailVerificationToken);
 
-    // Ne pas générer de tokens JWT tant que l'email n'est pas vérifié
+    // Générer les tokens JWT immédiatement
+    const tokens = await this.generateTokens(user);
+    
     return {
-      message: 'Inscription réussie. Veuillez vérifier votre email pour activer votre compte.',
+      message: 'Inscription réussie. Vous êtes maintenant connecté.',
       user: {
         id: user._id,
         firstName: user.firstName,
@@ -66,6 +68,7 @@ export class AuthService {
         role: user.role,
         emailVerified: user.emailVerified,
       },
+      ...tokens,
     };
   }
 
@@ -97,11 +100,11 @@ export class AuthService {
 
     this.logger.debug(`password valid for ${loginDto.email}`);
 
-    // Vérifier si l'email est vérifié
-    if (!user.emailVerified) {
-      this.logger.warn(`login failed: email not verified for ${loginDto.email}`);
-      throw new UnauthorizedException('Veuillez vérifier votre email avant de vous connecter. Vérifiez votre boîte de réception.');
-    }
+    // Vérification email désactivée (SMTP désactivé)
+    // if (!user.emailVerified) {
+    //   this.logger.warn(`login failed: email not verified for ${loginDto.email}`);
+    //   throw new UnauthorizedException('Veuillez vérifier votre email avant de vous connecter. Vérifiez votre boîte de réception.');
+    // }
 
     // Vérifier le statut du compte
     if (user.status === 'SUSPENDED') {
@@ -234,10 +237,10 @@ export class AuthService {
 
     await user.save();
 
-    // TODO: Envoyer email avec le lien de réinitialisation
-    // await this.mailService.sendPasswordResetEmail(user.email, resetToken);
+    // Envoyer email avec le lien de réinitialisation (désactivé)
+    // await this.sendPasswordResetEmail(user.email, resetToken);
 
-    return { message: 'Si cet email existe, un lien de réinitialisation a été envoyé' };
+    return { message: 'Fonctionnalité temporairement désactivée. Contactez un administrateur.' };
   }
 
   /**
@@ -310,12 +313,72 @@ export class AuthService {
     user.emailVerificationToken = emailVerificationToken;
     await user.save();
 
-    // Renvoyer l'email de vérification
-    await this.sendVerificationEmail(user.email, emailVerificationToken);
+    // Renvoyer l'email de vérification (désactivé)
+    // await this.sendVerificationEmail(user.email, emailVerificationToken);
 
     return {
-      message: 'Un nouvel email de vérification a été envoyé',
+      message: 'La vérification par email est désactivée. Votre compte est déjà actif.',
     };
+  }
+
+  /**
+   * Créer le transporteur email (méthode privée)
+   */
+  private createEmailTransporter() {
+    return nodemailer.createTransport({
+      host: this.configService.get('MAIL_HOST'),
+      port: parseInt(this.configService.get('MAIL_PORT') || '587'),
+      secure: this.configService.get('MAIL_SECURE') === 'true', // true for 465, false for other ports
+      tls: {
+        rejectUnauthorized: false, // Accepter les certificats auto-signés en développement
+      },
+      auth: {
+        user: this.configService.get('MAIL_USER'),
+        pass: this.configService.get('MAIL_PASSWORD'),
+      },
+    });
+  }
+
+  /**
+   * Envoyer l'email de réinitialisation de mot de passe (méthode privée)
+   */
+  private async sendPasswordResetEmail(email: string, token: string) {
+    const resetUrl = `${this.configService.get('FRONTEND_URL')}/reset-password?token=${token}`;
+
+    this.logger.debug(`sendPasswordResetEmail: preparing email for ${email}`);
+
+    const transporter = this.createEmailTransporter();
+
+    const mailOptions = {
+      from: this.configService.get('MAIL_FROM'),
+      to: email,
+      subject: 'Réinitialisation de votre mot de passe Soeurise',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #333; text-align: center;">Réinitialisation de mot de passe</h2>
+          <p>Vous avez demandé à réinitialiser votre mot de passe Soeurise.</p>
+          <p>Pour créer un nouveau mot de passe, cliquez sur le bouton ci-dessous :</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Réinitialiser mon mot de passe</a>
+          </div>
+          <p>Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :</p>
+          <p style="word-break: break-all; color: #666;">${resetUrl}</p>
+          <p style="color: #666; font-size: 14px;">Ce lien expirera dans 1 heure.</p>
+          <p style="color: #666; font-size: 14px;">Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="color: #666; font-size: 12px; text-align: center;">Soeurise - Marketplace communautaire</p>
+        </div>
+      `,
+    };
+
+    try {
+      this.logger.debug(`sendPasswordResetEmail: connecting to SMTP host ${this.configService.get('MAIL_HOST')}`);
+      await transporter.sendMail(mailOptions);
+      this.logger.log(`✓ Email de réinitialisation envoyé à ${email}`);
+    } catch (error) {
+      this.logger.error(`✗ Erreur lors de l'envoi de l'email de réinitialisation à ${email}: ${error?.message || error}`);
+      // Ne pas throw l'erreur pour ne pas bloquer la fonctionnalité
+    }
   }
 
   /**
@@ -327,17 +390,7 @@ export class AuthService {
     this.logger.debug(`sendVerificationEmail: preparing email for ${email}`);
     this.logger.debug(`SMTP config - host: ${this.configService.get('MAIL_HOST')}, port: ${this.configService.get('MAIL_PORT')}, user: ${this.configService.get('MAIL_USER')}`);
 
-    // Créer le transporteur nodemailer
-    const transporter = nodemailer.createTransport({
-      host: this.configService.get('MAIL_HOST'),
-      port: parseInt(this.configService.get('MAIL_PORT') || '587'),
-      secure: this.configService.get('MAIL_SECURE') === 'true', // true for 465, false for other ports
-      requireTLS: this.configService.get('MAIL_TLS') === 'true',
-      auth: {
-        user: this.configService.get('MAIL_USER'),
-        pass: this.configService.get('MAIL_PASSWORD'),
-      },
-    });
+    const transporter = this.createEmailTransporter();
 
     // Options de l'email
     const mailOptions = {

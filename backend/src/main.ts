@@ -38,7 +38,7 @@ async function seedAdminIfNotExists(app) {
     });
 
     const savedAdmin = await adminUser.save();
-    logger.log(`✓ Admin user created successfully: admin@soeurise.com (ID: ${savedAdmin._id})`);
+    logger.log(`✓ Admin user created successfully: ${savedAdmin.email} (ID: ${savedAdmin._id})`);
     logger.debug(`Admin details - verified: ${savedAdmin.emailVerified}, status: ${savedAdmin.status}, role: ${savedAdmin.role}`);
   } catch (error) {
     logger.error(`✗ Error seeding admin: ${error?.message || error}`);
