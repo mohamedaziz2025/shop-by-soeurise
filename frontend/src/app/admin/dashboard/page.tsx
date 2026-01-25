@@ -78,7 +78,6 @@ export default function AdminDashboardPage() {
       setLoading(false);
     }
   };
-  };
 
   if (loading) {
     return (
