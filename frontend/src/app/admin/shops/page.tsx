@@ -2,41 +2,43 @@
 
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
+import { api } from '@/lib/api';
 import {
   Search,
-  Filter,
   MoreHorizontal,
   CheckCircle,
   XCircle,
   Eye,
-  Edit,
   Store,
   User,
-  MapPin,
-  Calendar,
-  Package,
-  Star,
   AlertTriangle,
-  Clock
+  Clock,
+  Trash2,
+  Edit,
+  MapPin,
+  Package
 } from 'lucide-react';
+import Image from 'next/image';
 
 interface Shop {
-  id: string;
+  _id?: string;
+  id?: string;
   name: string;
   description: string;
   owner: {
-    id: string;
+    _id?: string;
+    id?: string;
     firstName: string;
     lastName: string;
     email: string;
   };
-  status: 'pending' | 'approved' | 'rejected' | 'suspended';
+  status: string;
   category: string;
-  location: string;
+  location?: string;
   createdAt: string;
-  productsCount: number;
-  totalSales: number;
-  rating: number;
+  productsCount?: number;
+  totalSales?: number;
+  rating?: number;
   logo?: string;
 }
 
@@ -48,8 +50,7 @@ export default function AdminShopsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [showActionMenu, setShowActionMenu] = useState<string | null>(null);
-  const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [approvalAction, setApprovalAction] = useState<'approve' | 'reject' | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     fetchShops();
@@ -61,40 +62,9 @@ export default function AdminShopsPage() {
 
   const fetchShops = async () => {
     try {
-      const response = await fetch('/api/shops', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement des boutiques');
-      }
-
-      const data = await response.json();
-
-      // Transformer les données pour correspondre à l'interface Shop
-      const transformedShops: Shop[] = data.map((shop: any) => ({
-        id: shop._id || shop.id,
-        name: shop.name,
-        description: shop.description,
-        owner: {
-          id: shop.owner?._id || shop.owner?.id,
-          firstName: shop.owner?.firstName || '',
-          lastName: shop.owner?.lastName || '',
-          email: shop.owner?.email || ''
-        },
-        status: shop.status === 'APPROVED' ? 'approved' : shop.status === 'PENDING_APPROVAL' ? 'pending' : shop.status === 'REJECTED' ? 'rejected' : 'suspended',
-        category: shop.category || 'Non catégorisé',
-        location: shop.location || 'Non spécifié',
-        createdAt: shop.createdAt,
-        productsCount: shop.productsCount || 0,
-        totalSales: shop.totalSales || 0,
-        rating: shop.rating || 0,
-        logo: shop.logo
-      }));
-
-      setShops(transformedShops);
+      setIsLoading(true);
+      const data = await api.getAllShops();
+      setShops(data);
     } catch (error) {
       console.error('Erreur lors du chargement des boutiques:', error);
       setShops([]);
@@ -109,9 +79,8 @@ export default function AdminShopsPage() {
     if (searchTerm) {
       filtered = filtered.filter(shop =>
         shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        shop.owner.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        shop.owner.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        shop.owner.email.toLowerCase().includes(searchTerm.toLowerCase())
+        shop.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        shop.owner?.email?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -124,65 +93,70 @@ export default function AdminShopsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'text-green-600 bg-green-100';
-      case 'pending': return 'text-yellow-600 bg-yellow-100';
-      case 'rejected': return 'text-red-600 bg-red-100';
-      case 'suspended': return 'text-orange-600 bg-orange-100';
+      case 'APPROVED': return 'text-green-600 bg-green-100';
+      case 'PENDING_APPROVAL': return 'text-yellow-600 bg-yellow-100';
+      case 'REJECTED': return 'text-red-600 bg-red-100';
+      case 'SUSPENDED': return 'text-orange-600 bg-orange-100';
       default: return 'text-gray-600 bg-gray-100';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'approved': return <CheckCircle className="w-4 h-4" />;
-      case 'pending': return <Clock className="w-4 h-4" />;
-      case 'rejected': return <XCircle className="w-4 h-4" />;
-      case 'suspended': return <AlertTriangle className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
+      case 'APPROVED': return <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />;
+      case 'PENDING_APPROVAL': return <Clock className="w-3 h-3 sm:w-4 sm:h-4" />;
+      case 'REJECTED': return <XCircle className="w-3 h-3 sm:w-4 sm:h-4" />;
+      case 'SUSPENDED': return <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4" />;
+      default: return <Clock className="w-3 h-3 sm:w-4 sm:h-4" />;
     }
   };
 
-  const handleShopAction = async (shopId: string, action: string) => {
+  const handleApprove = async (shopId: string) => {
     try {
-      if (action === 'approve' || action === 'reject') {
-        setSelectedShop(shops.find(s => s.id === shopId) || null);
-        setApprovalAction(action as 'approve' | 'reject');
-        setShowApprovalModal(true);
-      } else {
-        // TODO: Implémenter les autres actions
-        console.log(`Action ${action} pour la boutique ${shopId}`);
-      }
+      await api.approveShopAdmin(shopId);
+      await fetchShops();
       setShowActionMenu(null);
     } catch (error) {
-      console.error('Erreur lors de l\'action boutique:', error);
+      console.error('Erreur lors de l\'approbation:', error);
     }
   };
 
-  const confirmApprovalAction = async () => {
-    if (!selectedShop || !approvalAction) return;
-
+  const handleReject = async (shopId: string) => {
     try {
-      // TODO: Implémenter l'appel API pour approuver/rejeter la boutique
-      console.log(`${approvalAction === 'approve' ? 'Approbation' : 'Rejet'} de la boutique ${selectedShop.id}`);
-
-      // Mettre à jour le statut localement
-      setShops(prev => prev.map(shop =>
-        shop.id === selectedShop.id
-          ? { ...shop, status: approvalAction === 'approve' ? 'approved' : 'rejected' }
-          : shop
-      ));
-
-      setShowApprovalModal(false);
-      setSelectedShop(null);
-      setApprovalAction(null);
+      await api.rejectShopAdmin(shopId, 'Rejeté par l\'administrateur');
+      await fetchShops();
+      setShowActionMenu(null);
     } catch (error) {
-      console.error('Erreur lors de l\'approbation/rejet:', error);
+      console.error('Erreur lors du rejet:', error);
+    }
+  };
+
+  const handleSuspend = async (shopId: string) => {
+    try {
+      await api.suspendShopAdmin(shopId);
+      await fetchShops();
+      setShowActionMenu(null);
+    } catch (error) {
+      console.error('Erreur lors de la suspension:', error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedShop) return;
+    try {
+      const shopId = selectedShop._id || selectedShop.id || '';
+      await api.deleteShopAdmin(shopId);
+      await fetchShops();
+      setShowDeleteConfirm(false);
+      setSelectedShop(null);
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
     }
   };
 
   if (isLoading) {
     return (
-      <AdminLayout title="Gestion des boutiques" subtitle="Approuver et gérer les boutiques de la plateforme">
+      <AdminLayout title="Gestion des boutiques" subtitle="Gérer les boutiques">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
@@ -191,239 +165,287 @@ export default function AdminShopsPage() {
   }
 
   return (
-    <AdminLayout title="Gestion des boutiques" subtitle="Approuver et gérer les boutiques de la plateforme">
-      <div className="space-y-6">
+    <AdminLayout title="Gestion des boutiques" subtitle="Gérer les boutiques">
+      <div className="space-y-4 sm:space-y-6">
         {/* Filters */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search */}
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Rechercher par nom de boutique ou propriétaire..."
+                  placeholder="Rechercher..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="pl-9 sm:pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
 
-            {/* Status Filter */}
-            <div className="sm:w-48">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Tous les statuts</option>
-                <option value="pending">En attente</option>
-                <option value="approved">Approuvé</option>
-                <option value="rejected">Rejeté</option>
-                <option value="suspended">Suspendu</option>
-              </select>
-            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="sm:w-44 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tous</option>
+              <option value="APPROVED">Approuvé</option>
+              <option value="PENDING_APPROVAL">En attente</option>
+              <option value="REJECTED">Rejeté</option>
+              <option value="SUSPENDED">Suspendu</option>
+            </select>
           </div>
         </div>
 
-        {/* Pending Approvals Alert */}
-        {shops.filter(s => s.status === 'pending').length > 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <div className="flex">
-              <AlertTriangle className="h-5 w-5 text-yellow-400" />
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">
-                  {shops.filter(s => s.status === 'pending').length} boutique(s) en attente d'approbation
-                </h3>
-                <div className="mt-2 text-sm text-yellow-700">
-                  <p>Ces boutiques nécessitent votre attention pour être approuvées ou rejetées.</p>
-                </div>
-              </div>
-            </div>
+        {/* Shops List */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900">
+              {filteredShops.length} boutique{filteredShops.length > 1 ? 's' : ''}
+            </h3>
           </div>
-        )}
 
-        {/* Shops Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredShops.map((shop) => (
-            <div key={shop.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              {/* Shop Header */}
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                      <Store className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">{shop.name}</h3>
-                      <p className="text-sm text-gray-500">{shop.category}</p>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowActionMenu(showActionMenu === shop.id ? null : shop.id)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      <MoreHorizontal className="w-5 h-5" />
-                    </button>
-                    {showActionMenu === shop.id && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-                        <div className="py-1">
+          {/* Desktop Table */}
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Boutique</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Propriétaire</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produits</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ventes</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredShops.map((shop) => {
+                  const shopId = shop._id || shop.id || '';
+                  return (
+                    <tr key={shopId} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {shop.logo ? (
+                              <Image src={shop.logo} alt={shop.name} width={48} height={48} className="object-cover" />
+                            ) : (
+                              <Store className="w-6 h-6 text-gray-400" />
+                            )}
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">{shop.name}</div>
+                            <div className="text-xs text-gray-500">{shop.category}</div>
+                            {shop.location && (
+                              <div className="text-xs text-gray-500 flex items-center mt-1">
+                                <MapPin className="w-3 h-3 mr-1" />
+                                {shop.location}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center text-sm text-gray-900">
+                          <User className="w-4 h-4 mr-2 text-gray-400" />
+                          {shop.owner?.firstName} {shop.owner?.lastName}
+                        </div>
+                        <div className="text-xs text-gray-500">{shop.owner?.email}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shop.status)}`}>
+                          {getStatusIcon(shop.status)}
+                          <span className="ml-1">{shop.status}</span>
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <Package className="w-4 h-4 mr-1 text-gray-400" />
+                          {shop.productsCount || 0}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {shop.totalSales || 0} €
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="relative inline-block">
                           <button
-                            onClick={() => handleShopAction(shop.id, 'view')}
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                            onClick={() => setShowActionMenu(showActionMenu === shopId ? null : shopId)}
+                            className="text-gray-400 hover:text-gray-600 p-1"
                           >
-                            <Eye className="w-4 h-4 mr-2" />
-                            Voir détails
+                            <MoreHorizontal className="w-5 h-5" />
                           </button>
-                          <button
-                            onClick={() => handleShopAction(shop.id, 'edit')}
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                          >
-                            <Edit className="w-4 h-4 mr-2" />
-                            Modifier
-                          </button>
-                          {shop.status === 'pending' && (
+                          {showActionMenu === shopId && (
                             <>
-                              <button
-                                onClick={() => handleShopAction(shop.id, 'approve')}
-                                className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left"
-                              >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Approuver
-                              </button>
-                              <button
-                                onClick={() => handleShopAction(shop.id, 'reject')}
-                                className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
-                              >
-                                <XCircle className="w-4 h-4 mr-2" />
-                                Rejeter
-                              </button>
+                              <div className="fixed inset-0 z-10" onClick={() => setShowActionMenu(null)} />
+                              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border">
+                                <div className="py-1">
+                                  <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                                    <Eye className="w-4 h-4 mr-2" />Voir
+                                  </button>
+                                  <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                                    <Edit className="w-4 h-4 mr-2" />Modifier
+                                  </button>
+                                  {shop.status === 'PENDING_APPROVAL' && (
+                                    <>
+                                      <button
+                                        onClick={() => handleApprove(shopId)}
+                                        className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left"
+                                      >
+                                        <CheckCircle className="w-4 h-4 mr-2" />Approuver
+                                      </button>
+                                      <button
+                                        onClick={() => handleReject(shopId)}
+                                        className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                                      >
+                                        <XCircle className="w-4 h-4 mr-2" />Rejeter
+                                      </button>
+                                    </>
+                                  )}
+                                  {shop.status === 'APPROVED' && (
+                                    <button
+                                      onClick={() => handleSuspend(shopId)}
+                                      className="flex items-center px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 w-full text-left"
+                                    >
+                                      <AlertTriangle className="w-4 h-4 mr-2" />Suspendre
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => {
+                                      setSelectedShop(shop);
+                                      setShowDeleteConfirm(true);
+                                      setShowActionMenu(null);
+                                    }}
+                                    className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />Supprimer
+                                  </button>
+                                </div>
+                              </div>
                             </>
                           )}
                         </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="lg:hidden divide-y divide-gray-200">
+            {filteredShops.map((shop) => {
+              const shopId = shop._id || shop.id || '';
+              return (
+                <div key={shopId} className="p-4 hover:bg-gray-50">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {shop.logo ? (
+                          <Image src={shop.logo} alt={shop.name} width={48} height={48} className="object-cover" />
+                        ) : (
+                          <Store className="w-6 h-6 text-gray-400" />
+                        )}
                       </div>
-                    )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{shop.name}</p>
+                        <p className="text-xs text-gray-500">{shop.category}</p>
+                        <p className="text-xs text-gray-500 flex items-center mt-1">
+                          <User className="w-3 h-3 mr-1" />
+                          {shop.owner?.firstName} {shop.owner?.lastName}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowActionMenu(showActionMenu === shopId ? null : shopId)}
+                      className="ml-2 text-gray-400"
+                    >
+                      <MoreHorizontal className="w-5 h-5" />
+                    </button>
                   </div>
-                </div>
-              </div>
 
-              {/* Shop Content */}
-              <div className="p-6 space-y-4">
-                <p className="text-sm text-gray-600 line-clamp-2">{shop.description}</p>
-
-                {/* Owner */}
-                <div className="flex items-center space-x-2">
-                  <User className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">
-                    {shop.owner.firstName} {shop.owner.lastName}
-                  </span>
-                </div>
-
-                {/* Location */}
-                <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">{shop.location}</span>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-gray-900">{shop.productsCount}</div>
-                    <div className="text-xs text-gray-500">Produits</div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(shop.status)}`}>
+                      {getStatusIcon(shop.status)}
+                      <span className="ml-1">{shop.status}</span>
+                    </span>
+                    <span className="text-xs text-gray-500">{shop.productsCount || 0} produits</span>
+                    <span className="text-xs text-gray-500">{shop.totalSales || 0} €</span>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-gray-900">{shop.totalSales} €</div>
-                    <div className="text-xs text-gray-500">Ventes</div>
-                  </div>
+
+                  {showActionMenu === shopId && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setShowActionMenu(null)} />
+                      <div className="absolute right-4 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border">
+                        <div className="py-1">
+                          <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                            <Eye className="w-4 h-4 mr-2" />Voir
+                          </button>
+                          {shop.status === 'PENDING_APPROVAL' && (
+                            <>
+                              <button onClick={() => handleApprove(shopId)} className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left">
+                                <CheckCircle className="w-4 h-4 mr-2" />Approuver
+                              </button>
+                              <button onClick={() => handleReject(shopId)} className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left">
+                                <XCircle className="w-4 h-4 mr-2" />Rejeter
+                              </button>
+                            </>
+                          )}
+                          {shop.status === 'APPROVED' && (
+                            <button onClick={() => handleSuspend(shopId)} className="flex items-center px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 w-full text-left">
+                              <AlertTriangle className="w-4 h-4 mr-2" />Suspendre
+                            </button>
+                          )}
+                          <button onClick={() => {
+                            setSelectedShop(shop);
+                            setShowDeleteConfirm(true);
+                            setShowActionMenu(null);
+                          }} className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left">
+                            <Trash2 className="w-4 h-4 mr-2" />Supprimer
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
+              );
+            })}
+          </div>
 
-                {/* Rating */}
-                {shop.rating > 0 && (
-                  <div className="flex items-center justify-center space-x-1">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600">{shop.rating}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Status Badge */}
-              <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shop.status)}`}>
-                  {getStatusIcon(shop.status)}
-                  <span className="ml-1 capitalize">{shop.status}</span>
-                </span>
-                <span className="ml-2 text-xs text-gray-500">
-                  Créée le {new Date(shop.createdAt).toLocaleDateString('fr-FR')}
-                </span>
-              </div>
+          {filteredShops.length === 0 && (
+            <div className="text-center py-12">
+              <Store className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune boutique</h3>
             </div>
-          ))}
+          )}
         </div>
+      </div>
 
-        {filteredShops.length === 0 && (
-          <div className="text-center py-12">
-            <Store className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune boutique trouvée</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Aucune boutique ne correspond à vos critères de recherche.
-            </p>
-          </div>
-        )}
-
-        {/* Approval Modal */}
-        {showApprovalModal && selectedShop && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
-                <div className="flex items-center mb-4">
-                  {approvalAction === 'approve' ? (
-                    <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
-                  ) : (
-                    <XCircle className="w-6 h-6 text-red-500 mr-3" />
-                  )}
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {approvalAction === 'approve' ? 'Approuver' : 'Rejeter'} la boutique
-                  </h3>
-                </div>
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600">
-                    Êtes-vous sûr de vouloir {approvalAction === 'approve' ? 'approuver' : 'rejeter'} la boutique <strong>{selectedShop.name}</strong> ?
-                  </p>
-                  {approvalAction === 'reject' && (
-                    <p className="text-sm text-red-600 mt-2">
-                      Cette action empêchera le propriétaire de vendre sur la plateforme.
-                    </p>
-                  )}
-                </div>
-                <div className="flex justify-end space-x-3">
-                  <button
-                    onClick={() => {
-                      setShowApprovalModal(false);
-                      setSelectedShop(null);
-                      setApprovalAction(null);
-                    }}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={confirmApprovalAction}
-                    className={`px-4 py-2 text-sm font-medium text-white rounded-md ${
-                      approvalAction === 'approve'
-                        ? 'bg-green-600 hover:bg-green-700'
-                        : 'bg-red-600 hover:bg-red-700'
-                    }`}
-                  >
-                    {approvalAction === 'approve' ? 'Approuver' : 'Rejeter'}
-                  </button>
-                </div>
+      {/* Delete Modal */}
+      {showDeleteConfirm && selectedShop && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={() => setShowDeleteConfirm(false)} />
+            <div className="relative bg-white rounded-lg p-6 max-w-md w-full">
+              <div className="flex items-center mb-4">
+                <AlertTriangle className="h-6 w-6 text-red-600 mr-2" />
+                <h3 className="text-lg font-medium">Supprimer la boutique</h3>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">
+                Confirmer la suppression de <strong>{selectedShop.name}</strong> ?
+              </p>
+              <div className="flex gap-2 justify-end">
+                <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 border rounded-md hover:bg-gray-50">
+                  Annuler
+                </button>
+                <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                  Supprimer
+                </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

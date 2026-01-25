@@ -11,6 +11,7 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
       },
+      withCredentials: false,
     });
 
     // Intercepteur de requête pour ajouter le token
@@ -19,7 +20,8 @@ class ApiClient {
         if (typeof window !== 'undefined') {
           const token = localStorage.getItem('accessToken');
           if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            config.headers = config.headers || {};
+            config.headers['Authorization'] = `Bearer ${token}`;
           }
         }
         return config;
@@ -81,7 +83,7 @@ class ApiClient {
   }
 
   async getCurrentUser() {
-    const { data } = await this.client.post('/auth/me');
+    const { data } = await this.client.get('/auth/me');
     return data;
   }
 
@@ -374,6 +376,166 @@ class ApiClient {
   async updateShop(shopData: any) {
     return this.updateMyShop(shopData);
   }
-}
 
-export const api = new ApiClient();
+  // ============= ADMIN CRUD OPERATIONS =============
+
+  // Admin - Users CRUD
+  async getAllUsers(filters?: any) {
+    const { data } = await this.client.get('/admin/users', { params: filters });
+    return data;
+  }
+
+  async getUserById(userId: string) {
+    const { data } = await this.client.get(`/admin/users/${userId}`);
+    return data;
+  }
+
+  async createUser(userData: any) {
+    const { data } = await this.client.post('/admin/users', userData);
+    return data;
+  }
+
+  async updateUser(userId: string, userData: any) {
+    const { data } = await this.client.put(`/admin/users/${userId}`, userData);
+    return data;
+  }
+
+  async deleteUser(userId: string) {
+    const { data } = await this.client.delete(`/admin/users/${userId}`);
+    return data;
+  }
+
+  async updateUserStatus(userId: string, status: string) {
+    const { data } = await this.client.put(`/admin/users/${userId}/status`, { status });
+    return data;
+  }
+
+  async banUser(userId: string, reason?: string) {
+    const { data } = await this.client.put(`/admin/users/${userId}/ban`, { reason });
+    return data;
+  }
+
+  async unbanUser(userId: string) {
+    const { data } = await this.client.put(`/admin/users/${userId}/unban`);
+    return data;
+  }
+
+  // Admin - Products CRUD
+  async getAllProducts(filters?: any) {
+    const { data } = await this.client.get('/admin/products', { params: filters });
+    return data;
+  }
+
+  async getProductById(productId: string) {
+    const { data } = await this.client.get(`/admin/products/${productId}`);
+    return data;
+  }
+
+  async updateProductAdmin(productId: string, productData: any) {
+    const { data } = await this.client.put(`/admin/products/${productId}`, productData);
+    return data;
+  }
+
+  async deleteProductAdmin(productId: string) {
+    const { data } = await this.client.delete(`/admin/products/${productId}`);
+    return data;
+  }
+
+  async approveProductAdmin(productId: string, note?: string) {
+    const { data } = await this.client.put(`/admin/products/${productId}/approve`, { 
+      isApproved: true, 
+      note 
+    });
+    return data;
+  }
+
+  async rejectProductAdmin(productId: string, note?: string) {
+    const { data } = await this.client.put(`/admin/products/${productId}/approve`, { 
+      isApproved: false, 
+      note 
+    });
+    return data;
+  }
+
+  async suspendProduct(productId: string, reason?: string) {
+    const { data } = await this.client.put(`/admin/products/${productId}/suspend`, { reason });
+    return data;
+  }
+
+  // Admin - Shops CRUD  
+  async getShopByIdAdmin(shopId: string) {
+    const { data } = await this.client.get(`/admin/shops/${shopId}`);
+    return data;
+  }
+
+  async updateShopAdmin(shopId: string, shopData: any) {
+    const { data } = await this.client.put(`/admin/shops/${shopId}`, shopData);
+    return data;
+  }
+
+  async deleteShopAdmin(shopId: string) {
+    const { data } = await this.client.delete(`/admin/shops/${shopId}`);
+    return data;
+  }
+
+  async approveShopAdmin(shopId: string) {
+    const { data } = await this.client.put(`/admin/shops/${shopId}/approve`);
+    return data;
+  }
+
+  async rejectShopAdmin(shopId: string, reason: string) {
+    const { data } = await this.client.put(`/admin/shops/${shopId}/reject`, { reason });
+    return data;
+  }
+
+  async suspendShopAdmin(shopId: string, reason?: string) {
+    const { data } = await this.client.put(`/admin/shops/${shopId}/suspend`, { reason });
+    return data;
+  }
+
+  // Admin - Orders CRUD
+  async getAllOrders(filters?: any) {
+    const { data } = await this.client.get('/admin/orders', { params: filters });
+    return data;
+  }
+
+  async getOrderByIdAdmin(orderId: string) {
+    const { data } = await this.client.get(`/admin/orders/${orderId}`);
+    return data;
+  }
+
+  async updateOrderAdmin(orderId: string, orderData: any) {
+    const { data } = await this.client.put(`/admin/orders/${orderId}`, orderData);
+    return data;
+  }
+
+  async updateOrderStatusAdmin(orderId: string, status: string) {
+    const { data } = await this.client.put(`/admin/orders/${orderId}/status`, { status });
+    return data;
+  }
+
+  async cancelOrderAdmin(orderId: string, reason?: string) {
+    const { data } = await this.client.put(`/admin/orders/${orderId}/cancel`, { reason });
+    return data;
+  }
+
+  async deleteOrderAdmin(orderId: string) {
+    const { data } = await this.client.delete(`/admin/orders/${orderId}`);
+    return data;
+  }
+
+  // Admin - Reviews CRUD
+  async getAllReviews(filters?: any) {
+    const { data } = await this.client.get('/admin/reviews', { params: filters });
+    return data;
+  }
+
+  async deleteReview(reviewId: string) {
+    const { data } = await this.client.delete(`/admin/reviews/${reviewId}`);
+    return data;
+  }
+
+  async moderateReview(reviewId: string, action: 'approve' | 'reject') {
+    const { data } = await this.client.put(`/admin/reviews/${reviewId}/moderate`, { action });
+    return data;
+  }
