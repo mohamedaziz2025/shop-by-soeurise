@@ -58,6 +58,10 @@ export class SellerProfile {
   @Prop({ required: true })
   businessPhone: string;
 
+  // Logo de la boutique (pour la vitrine partenaires)
+  @Prop()
+  logo?: string;
+
   // Stripe Connect
   @Prop()
   stripeConnectId?: string;

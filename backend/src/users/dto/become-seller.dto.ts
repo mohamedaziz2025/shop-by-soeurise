@@ -46,4 +46,9 @@ export class BecomeSellerDto {
   @IsNotEmpty({ message: 'Le téléphone professionnel est requis' })
   @IsString()
   businessPhone: string;
+
+  // Logo de la boutique (optionnel lors de la création)
+  @IsOptional()
+  @IsString()
+  logo?: string;
 }

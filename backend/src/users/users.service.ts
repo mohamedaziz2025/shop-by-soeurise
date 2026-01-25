@@ -242,19 +242,55 @@ export class UsersService {
       },
       businessEmail: becomeSellerDto.businessEmail,
       businessPhone: becomeSellerDto.businessPhone,
+      logo: becomeSellerDto.logo,
     });
 
     await sellerProfile.save();
 
     // Mettre à jour le rôle de l'utilisateur
     user.role = UserRole.SELLER;
-    user.sellerProfile = sellerProfile._id;
+    user.sellerProfile = sellerProfile._id.toString();
     await user.save();
 
     return {
       message: 'Votre demande de vendeur a été soumise avec succès. Elle sera examinée par notre équipe.',
       sellerProfile: sellerProfile.toJSON(),
       user: user.toJSON(),
+    };
+  }
+
+  /**
+   * Mettre à jour le logo du profil vendeur
+   */
+  async updateSellerProfileLogo(userId: string, logoUrl: string) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    if (user.role !== UserRole.SELLER) {
+      throw new BadRequestException('L\'utilisateur n\'est pas un vendeur');
+    }
+
+    if (!user.sellerProfile) {
+      throw new BadRequestException('Profil vendeur introuvable');
+    }
+
+    const sellerProfile = await this.sellerProfileModel.findByIdAndUpdate(
+      user.sellerProfile,
+      { logo: logoUrl },
+      { new: true },
+    );
+
+    if (!sellerProfile) {
+      throw new NotFoundException('Profil vendeur introuvable');
+    }
+
+    return {
+      message: 'Logo du profil vendeur mis à jour avec succès',
+      logo: logoUrl,
+      sellerProfile: sellerProfile.toJSON(),
     };
   }
 }
