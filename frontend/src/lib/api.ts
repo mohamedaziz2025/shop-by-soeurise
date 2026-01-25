@@ -260,8 +260,54 @@ class ApiClient {
     return data;
   }
 
+  async getDailySales(days: number = 7) {
+    const { data } = await this.client.get('/admin/sales/daily', { params: { days } });
+    return data;
+  }
+
+  async getCategoriesStats() {
+    const { data } = await this.client.get('/admin/categories/stats');
+    return data;
+  }
+
+  async getRecentUsers(limit: number = 20) {
+    const { data } = await this.client.get('/admin/users/recent', { params: { limit } });
+    return data;
+  }
+
+  async getRecentOrders(limit: number = 20) {
+    const { data } = await this.client.get('/admin/orders/recent', { params: { limit } });
+    return data;
+  }
+
   async getPendingShops() {
     const { data } = await this.client.get('/admin/shops/pending');
+    return data;
+  }
+
+  async getPendingProducts() {
+    const { data } = await this.client.get('/admin/products/pending');
+    return data;
+  }
+
+  async approveProduct(productId: string, note?: string) {
+    const { data } = await this.client.put(`/products/${productId}/approve`, { 
+      isApproved: true, 
+      note 
+    });
+    return data;
+  }
+
+  async rejectProduct(productId: string, note?: string) {
+    const { data } = await this.client.put(`/products/${productId}/approve`, { 
+      isApproved: false, 
+      note 
+    });
+    return data;
+  }
+
+  async updateShopStatus(shopId: string, status: string, reason?: string) {
+    const { data } = await this.client.put(`/shops/${shopId}/status`, { status, reason });
     return data;
   }
 

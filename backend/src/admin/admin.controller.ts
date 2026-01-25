@@ -67,4 +67,16 @@ export class AdminController {
       new Date(endDate),
     );
   }
+
+  @Get('sales/daily')
+  async getDailySales(
+    @Query('days') days?: number,
+  ) {
+    return this.adminService.getDailySales(days ? parseInt(days.toString()) : 7);
+  }
+
+  @Get('categories/stats')
+  async getCategoriesStats() {
+    return this.adminService.getCategoriesStats();
+  }
 }

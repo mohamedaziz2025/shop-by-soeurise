@@ -224,4 +224,84 @@ export class AdminService {
 
     return Array.from(commissionsByShop.values());
   }
+
+  /**
+   * Ventes quotidiennes
+   */
+  async getDailySales(days: number = 7) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    startDate.setHours(0, 0, 0, 0);
+
+    const orders = await this.orderModel.find({
+      isSubOrder: false,
+      paymentStatus: 'PAID',
+      paidAt: { $gte: startDate },
+    });
+
+    // Grouper par jour
+    const salesByDay = new Map();
+    const dateFormatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' });
+
+    for (let i = 0; i < days; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (days - 1 - i));
+      date.setHours(0, 0, 0, 0);
+      const dayLabel = dateFormatter.format(date);
+      salesByDay.set(date.toDateString(), {
+        label: dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1),
+        value: 0,
+        orders: 0,
+      });
+    }
+
+    orders.forEach((order) => {
+      const orderDate = new Date(order.paidAt);
+      orderDate.setHours(0, 0, 0, 0);
+      const dateKey = orderDate.toDateString();
+
+      if (salesByDay.has(dateKey)) {
+        const dayData = salesByDay.get(dateKey);
+        dayData.value += order.total;
+        dayData.orders += 1;
+      }
+    });
+
+    return Array.from(salesByDay.values());
+  }
+
+  /**
+   * Statistiques par catégorie
+   */
+  async getCategoriesStats() {
+    const products = await this.productModel.find({ status: 'ACTIVE' });
+
+    const categoriesMap = new Map();
+    let totalProducts = products.length;
+
+    products.forEach((product) => {
+      const category = product.category || 'Non catégorisé';
+      if (!categoriesMap.has(category)) {
+        categoriesMap.set(category, {
+          name: category,
+          count: 0,
+          totalSales: 0,
+        });
+      }
+
+      const catData = categoriesMap.get(category);
+      catData.count += 1;
+      catData.totalSales += product.salesCount || 0;
+    });
+
+    const categories = Array.from(categoriesMap.values())
+      .map((cat) => ({
+        ...cat,
+        percentage: totalProducts > 0 ? Math.round((cat.count / totalProducts) * 100) : 0,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    return categories;
+  }
 }

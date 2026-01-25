@@ -41,7 +41,7 @@ export class User {
   @Prop()
   avatar?: string;
 
-  @Prop({ default: false })
+  @Prop({ default: true })
   emailVerified: boolean;
 
   @Prop()
