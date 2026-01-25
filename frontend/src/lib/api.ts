@@ -540,3 +540,5 @@ class ApiClient {
     return data;
   }
 }
+
+export const api = new ApiClient();
