@@ -136,6 +136,17 @@ export default function AdminLoginPage() {
           </div>
         </div>
 
+        {/* Admin Credentials Help */}
+        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-xs text-blue-800 text-center font-medium">
+            📋 Identifiants admin par défaut :
+          </p>
+          <p className="text-xs text-blue-700 text-center mt-1">
+            Email: admin@soeurise.com<br />
+            Mot de passe: admin123
+          </p>
+        </div>
+
         {/* Security Notice */}
         <div className="mt-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
           <p className="text-xs text-gray-400 text-center">

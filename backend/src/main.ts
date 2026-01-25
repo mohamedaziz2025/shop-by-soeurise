@@ -24,12 +24,12 @@ async function seedAdminIfNotExists(app) {
     }
 
     logger.log('Creating default admin user...');
-    const hashedPassword = await bcrypt.hash('Admin123!', 12);
+    const hashedPassword = await bcrypt.hash('admin123', 12);
 
     const adminUser = new userModel({
       firstName: 'Admin',
-      lastName: 'Shop By Soeurise',
-      email: 'admin2@shopbysoeurise.com',
+      lastName: 'Soeurise',
+      email: 'admin@soeurise.com',
       password: hashedPassword,
       role: UserRole.ADMIN,
       status: UserStatus.ACTIVE,
