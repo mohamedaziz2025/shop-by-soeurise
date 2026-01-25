@@ -52,62 +52,37 @@ export default function AdminUsersPage() {
 
   const fetchUsers = async () => {
     try {
-      // TODO: Remplacer par l'appel API réel
-      const mockUsers: User[] = [
-        {
-          id: '1',
-          firstName: 'Marie',
-          lastName: 'Dupont',
-          email: 'marie.dupont@email.com',
-          phone: '+33123456789',
-          role: 'USER',
-          status: 'active',
-          createdAt: '2024-01-15',
-          lastLogin: '2024-01-20',
-          ordersCount: 12,
-          totalSpent: 450.50
+      const response = await fetch('/api/users', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
-        {
-          id: '2',
-          firstName: 'Jean',
-          lastName: 'Martin',
-          email: 'jean.martin@email.com',
-          role: 'SELLER',
-          status: 'active',
-          createdAt: '2024-01-10',
-          lastLogin: '2024-01-19',
-          ordersCount: 0,
-          totalSpent: 0
-        },
-        {
-          id: '3',
-          firstName: 'Sophie',
-          lastName: 'Bernard',
-          email: 'sophie.bernard@email.com',
-          role: 'USER',
-          status: 'inactive',
-          createdAt: '2023-12-05',
-          lastLogin: '2023-12-15',
-          ordersCount: 3,
-          totalSpent: 125.75
-        },
-        {
-          id: '4',
-          firstName: 'Pierre',
-          lastName: 'Dubois',
-          email: 'pierre.dubois@email.com',
-          role: 'USER',
-          status: 'banned',
-          createdAt: '2023-11-20',
-          lastLogin: '2023-11-25',
-          ordersCount: 1,
-          totalSpent: 89.99
-        }
-      ];
+      });
 
-      setUsers(mockUsers);
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement des utilisateurs');
+      }
+
+      const data = await response.json();
+
+      // Transformer les données pour correspondre à l'interface User
+      const transformedUsers: User[] = data.map((user: any) => ({
+        id: user._id || user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        status: user.status === 'ACTIVE' ? 'active' : user.status === 'SUSPENDED' ? 'banned' : 'inactive',
+        createdAt: user.createdAt,
+        lastLogin: user.lastLoginAt,
+        ordersCount: user.ordersCount || 0,
+        totalSpent: user.totalSpent || 0
+      }));
+
+      setUsers(transformedUsers);
     } catch (error) {
       console.error('Erreur lors du chargement des utilisateurs:', error);
+      setUsers([]);
     } finally {
       setIsLoading(false);
     }

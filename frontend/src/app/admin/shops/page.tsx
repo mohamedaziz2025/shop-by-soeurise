@@ -61,67 +61,43 @@ export default function AdminShopsPage() {
 
   const fetchShops = async () => {
     try {
-      // TODO: Remplacer par l'appel API réel
-      const mockShops: Shop[] = [
-        {
-          id: '1',
-          name: 'Mode & Style',
-          description: 'Boutique de vêtements tendance pour femmes',
-          owner: {
-            id: '2',
-            firstName: 'Jean',
-            lastName: 'Martin',
-            email: 'jean.martin@email.com'
-          },
-          status: 'pending',
-          category: 'Mode',
-          location: 'Paris, France',
-          createdAt: '2024-01-15',
-          productsCount: 25,
-          totalSales: 1250.50,
-          rating: 4.2
+      const response = await fetch('/api/shops', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
-        {
-          id: '2',
-          name: 'Bijoux Créatifs',
-          description: 'Créations artisanales uniques',
-          owner: {
-            id: '3',
-            firstName: 'Sophie',
-            lastName: 'Bernard',
-            email: 'sophie.bernard@email.com'
-          },
-          status: 'approved',
-          category: 'Bijoux',
-          location: 'Lyon, France',
-          createdAt: '2024-01-10',
-          productsCount: 45,
-          totalSales: 3200.75,
-          rating: 4.8
-        },
-        {
-          id: '3',
-          name: 'Maison & Déco',
-          description: 'Articles de décoration intérieure',
-          owner: {
-            id: '4',
-            firstName: 'Pierre',
-            lastName: 'Dubois',
-            email: 'pierre.dubois@email.com'
-          },
-          status: 'rejected',
-          category: 'Maison',
-          location: 'Marseille, France',
-          createdAt: '2024-01-05',
-          productsCount: 0,
-          totalSales: 0,
-          rating: 0
-        }
-      ];
+      });
 
-      setShops(mockShops);
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement des boutiques');
+      }
+
+      const data = await response.json();
+
+      // Transformer les données pour correspondre à l'interface Shop
+      const transformedShops: Shop[] = data.map((shop: any) => ({
+        id: shop._id || shop.id,
+        name: shop.name,
+        description: shop.description,
+        owner: {
+          id: shop.owner?._id || shop.owner?.id,
+          firstName: shop.owner?.firstName || '',
+          lastName: shop.owner?.lastName || '',
+          email: shop.owner?.email || ''
+        },
+        status: shop.status === 'APPROVED' ? 'approved' : shop.status === 'PENDING_APPROVAL' ? 'pending' : shop.status === 'REJECTED' ? 'rejected' : 'suspended',
+        category: shop.category || 'Non catégorisé',
+        location: shop.location || 'Non spécifié',
+        createdAt: shop.createdAt,
+        productsCount: shop.productsCount || 0,
+        totalSales: shop.totalSales || 0,
+        rating: shop.rating || 0,
+        logo: shop.logo
+      }));
+
+      setShops(transformedShops);
     } catch (error) {
       console.error('Erreur lors du chargement des boutiques:', error);
+      setShops([]);
     } finally {
       setIsLoading(false);
     }

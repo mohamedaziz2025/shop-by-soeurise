@@ -49,29 +49,32 @@ export default function AdminDashboardPage() {
 
   const fetchDashboardStats = async () => {
     try {
-      // TODO: Remplacer par l'appel API réel
-      const mockStats: DashboardStats = {
-        totalUsers: 1250,
-        totalShops: 45,
-        totalProducts: 3200,
-        totalOrders: 890,
-        totalRevenue: 125000,
-        pendingApprovals: 12,
-        recentOrders: [
-          { id: '1', customerName: 'Marie Dupont', amount: 89.99, status: 'pending', createdAt: '2024-01-15' },
-          { id: '2', customerName: 'Jean Martin', amount: 145.50, status: 'completed', createdAt: '2024-01-14' },
-          { id: '3', customerName: 'Sophie Bernard', amount: 67.25, status: 'shipped', createdAt: '2024-01-14' },
-        ],
-        topProducts: [
-          { id: '1', name: 'Robe d\'été fleurie', sales: 45, revenue: 4500 },
-          { id: '2', name: 'Sac à main cuir', sales: 32, revenue: 6400 },
-          { id: '3', name: 'Bijoux fantaisie', sales: 28, revenue: 1400 },
-        ]
-      };
+      // Appel API réel pour les statistiques du dashboard
+      const response = await fetch('/api/admin/dashboard/stats', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
 
-      setStats(mockStats);
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement des statistiques');
+      }
+
+      const data = await response.json();
+      setStats(data);
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
+      // En cas d'erreur, utiliser des données par défaut
+      setStats({
+        totalUsers: 0,
+        totalShops: 0,
+        totalProducts: 0,
+        totalOrders: 0,
+        totalRevenue: 0,
+        pendingApprovals: 0,
+        recentOrders: [],
+        topProducts: []
+      });
     } finally {
       setIsLoading(false);
     }

@@ -66,79 +66,46 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      // TODO: Remplacer par l'appel API réel
-      const mockProducts: Product[] = [
-        {
-          id: '1',
-          name: 'Robe d\'été fleurie',
-          description: 'Belle robe légère parfaite pour l\'été',
-          price: 45.99,
-          category: 'Vêtements',
-          status: 'pending',
-          shop: {
-            id: '1',
-            name: 'Mode & Style',
-            owner: {
-              firstName: 'Jean',
-              lastName: 'Martin'
-            }
-          },
-          images: ['/images/product1.jpg'],
-          createdAt: '2024-01-15',
-          salesCount: 0,
-          rating: 0,
-          stock: 10,
-          tags: ['été', 'fleur', 'robe']
+      const response = await fetch('/api/products', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
-        {
-          id: '2',
-          name: 'Sac à main cuir',
-          description: 'Sac élégant en cuir véritable',
-          price: 89.99,
-          category: 'Accessoires',
-          status: 'approved',
-          shop: {
-            id: '2',
-            name: 'Bijoux Créatifs',
-            owner: {
-              firstName: 'Sophie',
-              lastName: 'Bernard'
-            }
-          },
-          images: ['/images/product2.jpg'],
-          createdAt: '2024-01-10',
-          salesCount: 15,
-          rating: 4.5,
-          stock: 5,
-          tags: ['cuir', 'élégant', 'sac']
-        },
-        {
-          id: '3',
-          name: 'Collier fantaisie',
-          description: 'Collier coloré avec pendentif',
-          price: 25.50,
-          category: 'Bijoux',
-          status: 'rejected',
-          shop: {
-            id: '2',
-            name: 'Bijoux Créatifs',
-            owner: {
-              firstName: 'Sophie',
-              lastName: 'Bernard'
-            }
-          },
-          images: ['/images/product3.jpg'],
-          createdAt: '2024-01-05',
-          salesCount: 0,
-          rating: 0,
-          stock: 0,
-          tags: ['collier', 'fantaisie', 'coloré']
-        }
-      ];
+      });
 
-      setProducts(mockProducts);
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement des produits');
+      }
+
+      const data = await response.json();
+
+      // Transformer les données pour correspondre à l'interface Product
+      const transformedProducts: Product[] = data.map((product: any) => ({
+        id: product._id || product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        category: product.category,
+        status: product.status === 'APPROVED' ? 'approved' : product.status === 'PENDING_APPROVAL' ? 'pending' : product.status === 'REJECTED' ? 'rejected' : 'suspended',
+        shop: {
+          id: product.shop?._id || product.shop?.id,
+          name: product.shop?.name || 'Boutique inconnue',
+          owner: {
+            firstName: product.shop?.owner?.firstName || '',
+            lastName: product.shop?.owner?.lastName || ''
+          }
+        },
+        images: product.images || [],
+        createdAt: product.createdAt,
+        salesCount: product.salesCount || 0,
+        rating: product.rating || 0,
+        stock: product.stock || 0,
+        tags: product.tags || []
+      }));
+
+      setProducts(transformedProducts);
     } catch (error) {
       console.error('Erreur lors du chargement des produits:', error);
+      setProducts([]);
     } finally {
       setIsLoading(false);
     }
