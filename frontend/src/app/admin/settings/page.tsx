@@ -150,13 +150,17 @@ export default function AdminSettingsPage() {
   const updateSetting = (section: keyof SettingsData, field: string, value: any) => {
     if (!settings) return;
 
-    setSettings(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }));
+    setSettings(prev => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value
+        }
+      };
+    });
   };
 
   const tabs = [
