@@ -89,6 +89,12 @@ export default function AdminDashboardPage() {
     );
   }
 
+  // Valeurs par défaut pour éviter les erreurs TypeScript
+  const pendingShops = stats?.pendingShops ?? 0;
+  const pendingProducts = stats?.pendingProducts ?? 0;
+  const pendingOrders = stats?.pendingOrders ?? 0;
+  const newUsersThisMonth = stats?.newUsersThisMonth ?? 0;
+
   return (
     <AdminLayout title="Dashboard" subtitle="Tableau de bord administrateur">
       <div className="space-y-6">
@@ -141,8 +147,8 @@ export default function AdminDashboardPage() {
               <div className="p-3 bg-white/20 rounded-lg backdrop-blur">
                 <ShoppingBag className="w-6 h-6" />
               </div>
-              {stats && stats.pendingOrders > 0 && (
-                <span className="text-xs font-semibold bg-red-500 px-2 py-1 rounded">{stats?.pendingOrders} en attente</span>
+              {stats && pendingOrders > 0 && (
+                <span className="text-xs font-semibold bg-red-500 px-2 py-1 rounded">{pendingOrders} en attente</span>
               )}
             </div>
             <div className="mt-4">
@@ -160,8 +166,8 @@ export default function AdminDashboardPage() {
               <div className="p-3 bg-white/20 rounded-lg backdrop-blur">
                 <Users className="w-6 h-6" />
               </div>
-              {stats && stats.newUsersThisMonth > 0 && (
-                <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded">+{stats?.newUsersThisMonth} ce mois</span>
+              {stats && newUsersThisMonth > 0 && (
+                <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded">+{newUsersThisMonth} ce mois</span>
               )}
             </div>
             <div className="mt-4">
@@ -178,8 +184,8 @@ export default function AdminDashboardPage() {
               <div className="p-3 bg-white/20 rounded-lg backdrop-blur">
                 <Store className="w-6 h-6" />
               </div>
-              {stats && stats.pendingShops > 0 && (
-                <span className="text-xs font-semibold bg-red-500 px-2 py-1 rounded">{stats?.pendingShops} en attente</span>
+              {stats && pendingShops > 0 && (
+                <span className="text-xs font-semibold bg-red-500 px-2 py-1 rounded">{pendingShops} en attente</span>
               )}
             </div>
             <div className="mt-4">
@@ -276,15 +282,15 @@ export default function AdminDashboardPage() {
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">Éléments à valider</p>
               </div>
-              {(stats?.pendingShops > 0 || stats?.pendingProducts > 0) && (
+              {(pendingShops > 0 || pendingProducts > 0) && (
                 <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">
-                  {(stats?.pendingShops || 0) + (stats?.pendingProducts || 0)} total
+                  {(pendingShops || 0) + (pendingProducts || 0)} total
                 </span>
               )}
             </div>
             
             <div className="space-y-3">
-              {stats?.pendingShops > 0 && (
+              {pendingShops > 0 && (
                 <div className="border border-orange-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-orange-50/50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -292,7 +298,7 @@ export default function AdminDashboardPage() {
                         <Store className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <div className="font-bold text-gray-900">{stats?.pendingShops} boutiques</div>
+                        <div className="font-bold text-gray-900">{pendingShops} boutiques</div>
                         <div className="text-sm text-gray-600">En attente de validation</div>
                       </div>
                     </div>
@@ -306,7 +312,7 @@ export default function AdminDashboardPage() {
                 </div>
               )}
               
-              {stats?.pendingProducts > 0 && (
+              {pendingProducts > 0 && (
                 <div className="border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-blue-50/50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -314,7 +320,7 @@ export default function AdminDashboardPage() {
                         <Package className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <div className="font-bold text-gray-900">{stats?.pendingProducts} produits</div>
+                        <div className="font-bold text-gray-900">{pendingProducts} produits</div>
                         <div className="text-sm text-gray-600">En attente d'approbation</div>
                       </div>
                     </div>
@@ -328,7 +334,7 @@ export default function AdminDashboardPage() {
                 </div>
               )}
               
-              {(!stats?.pendingShops && !stats?.pendingProducts) && (
+              {(!pendingShops && !pendingProducts) && (
                 <div className="text-center py-12">
                   <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
                   <p className="text-gray-600 font-medium">Aucune approbation en attente</p>
@@ -489,7 +495,7 @@ export default function AdminDashboardPage() {
               <Store className="w-8 h-8 mx-auto mb-3" />
               <div className="font-semibold">Valider boutiques</div>
               <div className="text-xs text-white/80 mt-1">
-                {stats?.pendingShops || 0} en attente
+                {pendingShops || 0} en attente
               </div>
             </Link>
             <Link 
@@ -499,7 +505,7 @@ export default function AdminDashboardPage() {
               <Package className="w-8 h-8 mx-auto mb-3" />
               <div className="font-semibold">Approuver produits</div>
               <div className="text-xs text-white/80 mt-1">
-                {stats?.pendingProducts || 0} en attente
+                {pendingProducts || 0} en attente
               </div>
             </Link>
             <Link 
