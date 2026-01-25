@@ -23,7 +23,15 @@ export default function AdminLoginPage() {
     setError('');
 
     try {
-      await login(formData.email, formData.password);
+      const result = await login(formData.email, formData.password);
+
+      if (!result.success) {
+        setError(result.error || 'Erreur lors de la connexion');
+        return;
+      }
+
+      // Attendre un peu pour que l'état se mette à jour
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Vérifier si l'utilisateur est admin
       const user = useAuthStore.getState().user;
