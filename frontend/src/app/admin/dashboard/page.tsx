@@ -264,8 +264,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        </div>
-
         {/* Tables Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Pending Approvals */}
@@ -467,8 +465,6 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        )}
-
         {/* Quick Actions */}
         <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl shadow-lg p-8 text-white">
           <div className="flex items-center justify-between mb-6">
@@ -516,7 +512,6 @@ export default function AdminDashboardPage() {
             </Link>
           </div>
         </div>
-      </div>
     </AdminLayout>
   );
 }
