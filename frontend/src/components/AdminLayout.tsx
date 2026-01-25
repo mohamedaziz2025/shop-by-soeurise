@@ -74,15 +74,9 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        </div>
-      )}
-
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+        <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-center h-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600">
             <div className="flex items-center space-x-2">
@@ -137,6 +131,13 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
         </div>
       </div>
 
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+        </div>
+      )}
+
       {/* Main content */}
       <div className="flex-1 lg:ml-64">
         {/* Top bar */}
@@ -185,7 +186,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                 <div className="relative">
                   <button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50">
                     <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
+                      <User className="w-4 h-4" />
                     </div>
                     <ChevronDown className="w-4 h-4 text-gray-400" />
                   </button>
