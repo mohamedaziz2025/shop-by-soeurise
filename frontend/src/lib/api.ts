@@ -539,3 +539,4 @@ class ApiClient {
     const { data } = await this.client.put(`/admin/reviews/${reviewId}/moderate`, { action });
     return data;
   }
+}
