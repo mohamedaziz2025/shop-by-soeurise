@@ -52,14 +52,4 @@ export class AuthController {
   async getProfile(@Request() req) {
     return req.user;
   }
-
-  @Get('verify-email/:token')
-  async verifyEmail(@Param('token') token: string) {
-    return this.authService.verifyEmail(token);
-  }
-
-  @Post('resend-verification')
-  async resendVerificationEmail(@Body('email') email: string) {
-    return this.authService.resendVerificationEmail(email);
-  }
 }

@@ -4,7 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { User, UserDocument, UserStatus } from '../schemas/user.schema';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
@@ -37,15 +36,11 @@ export class AuthService {
     // Hash du mot de passe
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    // Générer un token de vérification d'email (désactivé)
-    // const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-
     // Créer l'utilisateur avec email vérifié par défaut (SMTP désactivé)
     const user = new this.userModel({
       ...registerDto,
       password: hashedPassword,
       emailVerified: true, // Désactivation de la vérification email
-      // emailVerificationToken,
       status: 'ACTIVE', // Compte actif immédiatement
     });
 
@@ -264,61 +259,6 @@ export class AuthService {
     await user.save();
 
     return { message: 'Mot de passe réinitialisé avec succès' };
-  }
-
-  /**
-   * Vérifier l'email avec le token
-   */
-  async verifyEmail(token: string) {
-    const user = await this.userModel.findOne({
-      emailVerificationToken: token,
-    });
-
-    if (!user) {
-      throw new BadRequestException('Token de vérification invalide');
-    }
-
-    if (user.emailVerified) {
-      throw new BadRequestException('Cet email est déjà vérifié');
-    }
-
-    // Vérifier et activer le compte
-    user.emailVerified = true;
-    user.emailVerificationToken = undefined; // Supprimer le token
-    user.status = UserStatus.ACTIVE; // Activer le compte
-    await user.save();
-
-    return {
-      message: 'Email vérifié avec succès. Votre compte est maintenant actif.',
-      user: user.toJSON(),
-    };
-  }
-
-  /**
-   * Renvoyer l'email de vérification
-   */
-  async resendVerificationEmail(email: string) {
-    const user = await this.userModel.findOne({ email });
-
-    if (!user) {
-      throw new BadRequestException('Utilisateur introuvable');
-    }
-
-    if (user.emailVerified) {
-      throw new BadRequestException('Cet email est déjà vérifié');
-    }
-
-    // Générer un nouveau token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    user.emailVerificationToken = emailVerificationToken;
-    await user.save();
-
-    // Renvoyer l'email de vérification (désactivé)
-    // await this.sendVerificationEmail(user.email, emailVerificationToken);
-
-    return {
-      message: 'La vérification par email est désactivée. Votre compte est déjà actif.',
-    };
   }
 
   /**
