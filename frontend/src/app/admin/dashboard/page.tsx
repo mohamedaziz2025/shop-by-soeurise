@@ -278,7 +278,7 @@ export default function AdminDashboardPage() {
               </div>
               {(stats?.pendingShops > 0 || stats?.pendingProducts > 0) && (
                 <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">
-                  {(stats.pendingShops || 0) + (stats.pendingProducts || 0)} total
+                  {(stats?.pendingShops || 0) + (stats?.pendingProducts || 0)} total
                 </span>
               )}
             </div>
