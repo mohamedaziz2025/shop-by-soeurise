@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Put,
   Delete,
   Body,
@@ -10,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto, ChangePasswordDto } from './dto/update-user.dto';
+import { BecomeSellerDto } from './dto/become-seller.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -60,6 +62,14 @@ export class UsersController {
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
     return this.usersService.changePassword(user.userId, changePasswordDto);
+  }
+
+  @Post('become-seller')
+  async becomeSeller(
+    @CurrentUser() user: any,
+    @Body() becomeSellerDto: BecomeSellerDto,
+  ) {
+    return this.usersService.becomeSeller(user.userId, becomeSellerDto);
   }
 
   @Delete('account')

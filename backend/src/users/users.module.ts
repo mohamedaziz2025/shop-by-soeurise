@@ -6,6 +6,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User, UserSchema } from '../schemas/user.schema';
 import { Product, ProductSchema } from '../schemas/product.schema';
+import { SellerProfile, SellerProfileSchema } from '../schemas/seller-profile.schema';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { Product, ProductSchema } from '../schemas/product.schema';
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Product.name, schema: ProductSchema },
+      { name: SellerProfile.name, schema: SellerProfileSchema },
     ]),
   ],
   controllers: [UsersController],

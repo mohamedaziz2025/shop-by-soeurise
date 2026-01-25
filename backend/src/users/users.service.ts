@@ -2,15 +2,18 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import { User, UserDocument } from '../schemas/user.schema';
+import { User, UserDocument, UserRole } from '../schemas/user.schema';
 import { Product, ProductDocument } from '../schemas/product.schema';
+import { SellerProfile, SellerProfileDocument } from '../schemas/seller-profile.schema';
 import { UpdateUserDto, ChangePasswordDto } from './dto/update-user.dto';
+import { BecomeSellerDto } from './dto/become-seller.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(SellerProfile.name) private sellerProfileModel: Model<SellerProfileDocument>,
   ) {}
 
   /**
@@ -200,5 +203,58 @@ export class UsersService {
     await user.save();
 
     return { message: 'Produit retiré des favoris', favorites: user.favorites };
+  }
+
+  /**
+   * Permettre à un client de devenir vendeur
+   */
+  async becomeSeller(userId: string, becomeSellerDto: BecomeSellerDto) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    // Vérifier que l'utilisateur est bien un client
+    if (user.role !== UserRole.CLIENT) {
+      throw new BadRequestException('Seuls les clients peuvent devenir vendeurs');
+    }
+
+    // Vérifier si l'utilisateur a déjà un profil vendeur
+    const existingProfile = await this.sellerProfileModel.findOne({ userId });
+    if (existingProfile) {
+      throw new BadRequestException('Vous avez déjà une demande de vendeur en cours ou êtes déjà vendeur');
+    }
+
+    // Créer le profil vendeur
+    const sellerProfile = new this.sellerProfileModel({
+      userId,
+      businessName: becomeSellerDto.businessName,
+      businessDescription: becomeSellerDto.businessDescription,
+      siret: becomeSellerDto.siret,
+      tvaNumber: becomeSellerDto.tvaNumber,
+      legalForm: becomeSellerDto.legalForm,
+      businessAddress: {
+        street: becomeSellerDto.businessStreet,
+        city: becomeSellerDto.businessCity,
+        postalCode: becomeSellerDto.businessPostalCode,
+        country: becomeSellerDto.businessCountry || 'France',
+      },
+      businessEmail: becomeSellerDto.businessEmail,
+      businessPhone: becomeSellerDto.businessPhone,
+    });
+
+    await sellerProfile.save();
+
+    // Mettre à jour le rôle de l'utilisateur
+    user.role = UserRole.SELLER;
+    user.sellerProfile = sellerProfile._id;
+    await user.save();
+
+    return {
+      message: 'Votre demande de vendeur a été soumise avec succès. Elle sera examinée par notre équipe.',
+      sellerProfile: sellerProfile.toJSON(),
+      user: user.toJSON(),
+    };
   }
 }
