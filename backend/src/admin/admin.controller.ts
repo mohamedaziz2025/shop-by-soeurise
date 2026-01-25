@@ -79,4 +79,14 @@ export class AdminController {
   async getCategoriesStats() {
     return this.adminService.getCategoriesStats();
   }
+
+  @Get('users')
+  async getAllUsers(@Query() filters: any) {
+    return this.adminService.getAllUsers(filters);
+  }
+
+  @Get('shops')
+  async getAllShops() {
+    return this.adminService.getAllShops();
+  }
 }

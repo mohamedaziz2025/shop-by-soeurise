@@ -304,4 +304,19 @@ export class AdminService {
 
     return categories;
   }
+
+  async getAllUsers(filters?: any) {
+    const query = {};
+    if (filters?.role) {
+      query['role'] = filters.role;
+    }
+    if (filters?.status) {
+      query['status'] = filters.status;
+    }
+    return this.userModel.find(query).sort({ createdAt: -1 });
+  }
+
+  async getAllShops() {
+    return this.shopModel.find().sort({ createdAt: -1 });
+  }
 }

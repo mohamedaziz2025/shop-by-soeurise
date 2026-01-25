@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
+import { api } from '@/lib/api';
 import {
   Users,
   Store,
@@ -50,17 +51,7 @@ export default function AdminDashboardPage() {
   const fetchDashboardStats = async () => {
     try {
       // Appel API réel pour les statistiques du dashboard
-      const response = await fetch('/api/admin/dashboard/stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement des statistiques');
-      }
-
-      const data = await response.json();
+      const data = await api.getDashboardStats();
       setStats(data);
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
