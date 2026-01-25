@@ -142,7 +142,7 @@ export default function AdminDashboardPage() {
                 <ShoppingBag className="w-6 h-6" />
               </div>
               {stats && stats.pendingOrders > 0 && (
-                <span className="text-xs font-semibold bg-red-500 px-2 py-1 rounded">{stats.pendingOrders} en attente</span>
+                <span className="text-xs font-semibold bg-red-500 px-2 py-1 rounded">{stats?.pendingOrders} en attente</span>
               )}
             </div>
             <div className="mt-4">
@@ -161,7 +161,7 @@ export default function AdminDashboardPage() {
                 <Users className="w-6 h-6" />
               </div>
               {stats && stats.newUsersThisMonth > 0 && (
-                <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded">+{stats.newUsersThisMonth} ce mois</span>
+                <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded">+{stats?.newUsersThisMonth} ce mois</span>
               )}
             </div>
             <div className="mt-4">
@@ -179,7 +179,7 @@ export default function AdminDashboardPage() {
                 <Store className="w-6 h-6" />
               </div>
               {stats && stats.pendingShops > 0 && (
-                <span className="text-xs font-semibold bg-red-500 px-2 py-1 rounded">{stats.pendingShops} en attente</span>
+                <span className="text-xs font-semibold bg-red-500 px-2 py-1 rounded">{stats?.pendingShops} en attente</span>
               )}
             </div>
             <div className="mt-4">
@@ -292,7 +292,7 @@ export default function AdminDashboardPage() {
                         <Store className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <div className="font-bold text-gray-900">{stats.pendingShops} boutiques</div>
+                        <div className="font-bold text-gray-900">{stats?.pendingShops} boutiques</div>
                         <div className="text-sm text-gray-600">En attente de validation</div>
                       </div>
                     </div>
@@ -314,7 +314,7 @@ export default function AdminDashboardPage() {
                         <Package className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <div className="font-bold text-gray-900">{stats.pendingProducts} produits</div>
+                        <div className="font-bold text-gray-900">{stats?.pendingProducts} produits</div>
                         <div className="text-sm text-gray-600">En attente d'approbation</div>
                       </div>
                     </div>
