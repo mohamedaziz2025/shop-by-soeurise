@@ -186,6 +186,15 @@ export class AuthService {
 
     const accessExpiresIn = parseInt(this.configService.get('JWT_EXPIRES_IN', '900'), 10);
     const refreshExpiresIn = parseInt(this.configService.get('JWT_REFRESH_EXPIRES_IN', '604800'), 10);
+    
+    console.log('JWT Config:', {
+      accessExpiresIn,
+      refreshExpiresIn,
+      accessIsNaN: isNaN(accessExpiresIn),
+      refreshIsNaN: isNaN(refreshExpiresIn),
+      rawAccess: this.configService.get('JWT_EXPIRES_IN'),
+      rawRefresh: this.configService.get('JWT_REFRESH_EXPIRES_IN')
+    });
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
