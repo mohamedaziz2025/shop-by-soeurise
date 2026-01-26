@@ -141,21 +141,19 @@ function MarketplacePageContent() {
           <main className="flex-1">
             {/* Header Sticky: Breadcrumb + Search */}
             <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-              <div className="px-8 py-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-2">
-                    {/* Mobile categories button */}
-                    <button
-                      onClick={() => setShowMobileCategories(true)}
-                      className="lg:hidden inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-md"
-                    >
-                      <Home className="w-4 h-4 text-gray-600" />
-                      <span className="text-sm text-gray-700">Univers</span>
-                    </button>
-                  </div>
+              <div className="px-4 sm:px-6 lg:px-8 py-4">
+                {/* Mobile categories button */}
+                <div className="lg:hidden mb-3">
+                  <button
+                    onClick={() => setShowMobileCategories(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg font-medium shadow-sm hover:bg-indigo-600 transition"
+                  >
+                    <Home className="w-4 h-4" />
+                    <span className="text-sm">Univers & Boutiques</span>
+                  </button>
                 </div>
                 {/* Breadcrumb */}
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-3">
+                <div className="hidden lg:flex items-center gap-2 text-sm font-medium text-gray-600 mb-3">
                   <Home className="w-4 h-4" />
                   <ChevronRight className="w-4 h-4" />
                   <span className={`text-${accentColor}-600 font-black`}>{category}</span>
@@ -215,11 +213,11 @@ function MarketplacePageContent() {
                   <motion.h1
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-5xl font-black text-gray-900 mb-4 tracking-tighter"
+                    className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-3 lg:mb-4 tracking-tighter"
                   >
                     Boutiques — {category}
                   </motion.h1>
-                  <p className="text-xl text-gray-600 mb-8">
+                  <p className="text-lg sm:text-xl text-gray-600 mb-6 lg:mb-8">
                     {shops.length} boutique{shops.length > 1 ? 's' : ''} disponible{shops.length > 1 ? 's' : ''}
                   </p>
 
@@ -523,11 +521,11 @@ function MarketplacePageContent() {
                     <motion.h1
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-4xl font-black text-gray-900 mb-4 tracking-tighter"
+                      className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-3 lg:mb-4 tracking-tighter"
                     >
                       {selectedShop?.name} — Catalogue
                     </motion.h1>
-                    <p className="text-xl text-gray-600 mb-8">
+                    <p className="text-lg sm:text-xl text-gray-600 mb-6 lg:mb-8">
                       {products.length} produit{products.length > 1 ? 's' : ''}
                     </p>
 
@@ -544,7 +542,7 @@ function MarketplacePageContent() {
                         </p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                         {Array.isArray(products) && products.map((product, i) => (
                           <motion.div
                             key={product._id}
