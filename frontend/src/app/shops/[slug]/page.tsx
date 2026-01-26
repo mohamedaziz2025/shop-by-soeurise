@@ -343,7 +343,7 @@ export default function ShopDetailPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {products.map((product, i) => (
+                {Array.isArray(products) && products.map((product, i) => (
                   <motion.div
                     key={product._id}
                     initial={{ opacity: 0, y: 20 }}

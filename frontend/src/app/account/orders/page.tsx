@@ -73,7 +73,7 @@ export default function OrdersPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {orders.map((order) => (
+            {Array.isArray(orders) && orders.map((order) => (
               <div key={order._id} className="bg-white rounded-lg shadow-sm overflow-hidden">
                 {/* Header */}
                 <div className="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">

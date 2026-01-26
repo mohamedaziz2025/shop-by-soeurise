@@ -124,7 +124,7 @@ export default function SellerProductsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {products.map((product) => (
+                  {Array.isArray(products) && products.map((product) => (
                     <tr key={product._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">

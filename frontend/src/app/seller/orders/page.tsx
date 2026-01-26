@@ -131,7 +131,7 @@ export default function SellerOrdersPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredOrders.map((order) => (
+              {Array.isArray(filteredOrders) && filteredOrders.map((order) => (
                 <div key={order._id} className="bg-white rounded-lg shadow-sm overflow-hidden">
                   {/* Order Header */}
                   <div className="p-6 border-b border-gray-100">

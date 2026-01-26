@@ -203,7 +203,7 @@ export default function UserDashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {recentOrders.map((order) => (
+                  {Array.isArray(recentOrders) && recentOrders.map((order) => (
                     <div key={order._id} className="border border-gray-200 rounded-lg p-4 hover:border-pink-300 transition">
                       <div className="flex items-start justify-between mb-3">
                         <div>
