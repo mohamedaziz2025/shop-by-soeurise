@@ -27,11 +27,28 @@ export default function SellerDashboardPage() {
     if (!user) {
       return;
     }
-    if (user.role !== 'SELLER') {
-      router.push('/');
-      return;
-    }
-    fetchStats();
+    
+    // Allow access if user is SELLER or has a shop
+    const checkAccess = async () => {
+      if (user.role === 'SELLER') {
+        fetchStats();
+        return;
+      }
+      
+      // Check if user has a shop
+      try {
+        const shop = await api.getMyShop().catch(() => null);
+        if (shop && shop._id) {
+          fetchStats();
+        } else {
+          router.push('/');
+        }
+      } catch (err) {
+        router.push('/');
+      }
+    };
+    
+    checkAccess();
   }, [user, router, timeRange, isAuthenticated, isLoading]);
 
   const fetchStats = async () => {
