@@ -24,8 +24,7 @@ export default function SellerDashboardPage() {
   useEffect(() => {
     if (isLoading) return; // Wait for auth initialization
 
-    if (!isAuthenticated || !user) {
-      router.push('/login');
+    if (!user) {
       return;
     }
     if (user.role !== 'SELLER') {

@@ -52,7 +52,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
     if (isLoading) return; // Wait for auth initialization
 
     // Vérifier si l'utilisateur est admin
-    if (!isAuthenticated || !user || user.role !== 'ADMIN') {
+    if (!user || user.role !== 'ADMIN') {
       router.push('/admin/login');
     }
   }, [user, router, isAuthenticated, isLoading]);
@@ -66,7 +66,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
     }
   };
 
-  if (isLoading || !isAuthenticated || !user || user.role !== 'ADMIN') {
+  if (isLoading || !user || user.role !== 'ADMIN') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>

@@ -43,10 +43,6 @@ export default function SellerSettingsPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
     if (user) {
       setProfileData({
         firstName: user.firstName || '',

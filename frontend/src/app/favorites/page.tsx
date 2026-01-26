@@ -15,10 +15,6 @@ export default function FavoritesPage() {
   useEffect(() => {
     if (isLoading) return; // Wait for auth initialization
 
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
     loadFavorites();
   }, [isAuthenticated, isLoading]);
 

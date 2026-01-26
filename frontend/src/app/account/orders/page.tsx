@@ -15,12 +15,8 @@ export default function OrdersPage() {
   const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
     fetchOrders();
-  }, [isAuthenticated]);
+  }, []);
 
   const fetchOrders = async () => {
     try {

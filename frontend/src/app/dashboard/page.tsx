@@ -25,11 +25,6 @@ export default function UserDashboardPage() {
   useEffect(() => {
     if (isLoading) return; // Wait for auth initialization
 
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-
     if (!user) {
       return;
     }
@@ -48,12 +43,6 @@ export default function UserDashboardPage() {
   }, [user, router, isAuthenticated, isLoading]);
 
   const fetchDashboardData = async () => {
-    // Vérifier que l'utilisateur est toujours authentifié avant de faire les appels
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-
     try {
       const [ordersData, favoritesData] = await Promise.all([
         api.getMyOrders().catch(() => []),
