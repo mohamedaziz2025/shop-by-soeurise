@@ -28,16 +28,19 @@ import * as fs from 'fs';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@CurrentUser() user: any) {
     return this.usersService.findById(user.userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('favorites')
   async getFavorites(@CurrentUser() user: any) {
     return this.usersService.getFavorites(user.userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put('favorites/:productId')
   async addToFavorites(
     @CurrentUser() user: any,
@@ -46,6 +49,7 @@ export class UsersController {
     return this.usersService.addToFavorites(user.userId, productId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete('favorites/:productId')
   async removeFromFavorites(
     @CurrentUser() user: any,
@@ -54,6 +58,7 @@ export class UsersController {
     return this.usersService.removeFromFavorites(user.userId, productId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put('profile')
   async updateProfile(
     @CurrentUser() user: any,
@@ -62,6 +67,7 @@ export class UsersController {
     return this.usersService.updateProfile(user.userId, updateUserDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put('change-password')
   async changePassword(
     @CurrentUser() user: any,
@@ -70,6 +76,7 @@ export class UsersController {
     return this.usersService.changePassword(user.userId, changePasswordDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('become-seller')
   async becomeSeller(
     @CurrentUser() user: any,
@@ -78,6 +85,7 @@ export class UsersController {
     return this.usersService.becomeSeller(user.userId, becomeSellerDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('seller-profile/logo')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -109,6 +117,7 @@ export class UsersController {
     return this.usersService.updateSellerProfileLogo(user.userId, publicUrl);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete('account')
   async deleteAccount(@CurrentUser() user: any) {
     return this.usersService.deleteAccount(user.userId);

@@ -50,11 +50,13 @@ export class ShopsController {
   }
 
   // Routes SELLER
+  @UseGuards(JwtAuthGuard)
   @Get('seller/my-shop')
   async getMyShop(@CurrentUser() user: any) {
     return this.shopsService.findBySellerId(user.userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('seller/stats')
   async getSellerStats(@CurrentUser() user: any) {
     return this.shopsService.getSellerStats(user.userId);
@@ -65,16 +67,19 @@ export class ShopsController {
     return this.shopsService.findById(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(@CurrentUser() user: any, @Body() createShopDto: CreateShopDto) {
     return this.shopsService.create(user.userId, createShopDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put('seller/my-shop')
   async update(@CurrentUser() user: any, @Body() updateShopDto: UpdateShopDto) {
     return this.shopsService.update(user.userId, updateShopDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('seller/logo')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -103,6 +108,7 @@ export class ShopsController {
     return this.shopsService.update(user.userId, { logo: publicUrl } as UpdateShopDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete('seller/my-shop')
   async delete(@CurrentUser() user: any) {
     return this.shopsService.delete(user.userId);

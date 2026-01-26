@@ -22,6 +22,7 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   // Routes CLIENT
+  @UseGuards(JwtAuthGuard)
   @Post()
   async createOrder(
     @CurrentUser() user: any,
@@ -30,6 +31,7 @@ export class OrdersController {
     return this.ordersService.createOrder(user.userId, createOrderDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('my-orders')
   async getMyOrders(@CurrentUser() user: any) {
     return this.ordersService.findByCustomerId(user.userId);
@@ -40,6 +42,7 @@ export class OrdersController {
     return this.ordersService.findById(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put(':id/cancel')
   async cancelOrder(
     @Param('id') id: string,

@@ -26,6 +26,7 @@ export class ShipmentsController {
   }
 
   // Routes CLIENT
+  @UseGuards(JwtAuthGuard)
   @Get('customer/my-shipments')
   async getMyShipments(@CurrentUser() user: any) {
     return this.shipmentsService.findByCustomerId(user.userId);
