@@ -16,6 +16,10 @@ export default function UserDashboardPage() {
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sellerShop, setSellerShop] = useState<any | null>(null);
+  const [hasShop, setHasShop] = useState(false);
+  const [activeTab, setActiveTab] = useState<'client' | 'seller'>('client');
+  const [sellerStats, setSellerStats] = useState<any | null>(null);
 
   const handleLogout = () => {
     logout();
@@ -29,11 +33,28 @@ export default function UserDashboardPage() {
       return;
     }
 
-    // Rediriger selon le rôle
-    if (user.role === 'SELLER') {
-      router.push('/seller/dashboard');
+    // Check for admin role
+    if (user.role === 'ADMIN') {
+      router.push('/admin/dashboard');
       return;
     }
+
+    // Check if the user owns a shop (render seller + client sections)
+    (async () => {
+      try {
+        const shop = await api.getMyShop().catch(() => null);
+        if (shop && shop._id) {
+          setSellerShop(shop);
+          setHasShop(true);
+        } else {
+          setSellerShop(null);
+          setHasShop(false);
+        }
+      } catch (err) {
+        setSellerShop(null);
+        setHasShop(false);
+      }
+    })();
     if (user.role === 'ADMIN') {
       router.push('/admin/dashboard');
       return;
@@ -74,6 +95,25 @@ export default function UserDashboardPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Fetch seller stats when user switches to Seller tab and owns a shop
+    if (!hasShop || activeTab !== 'seller') return;
+
+    let mounted = true;
+    (async () => {
+      try {
+        const stats = await api.getSellerStats().catch(() => null);
+        if (mounted) setSellerStats(stats);
+      } catch (err) {
+        if (mounted) setSellerStats(null);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [hasShop, activeTab]);
 
   if (loading) {
     return <LoadingSpinner size="lg" />;
@@ -133,6 +173,61 @@ export default function UserDashboardPage() {
             </Link>
           </div>
         </div>
+
+        {/* Seller Summary (if user owns a shop) */}
+        {hasShop && sellerShop && (
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Espace Vendeur</h2>
+                <p className="text-sm text-gray-600">Votre boutique : <span className="font-medium">{sellerShop.name}</span></p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link href={`/shop/${sellerShop.slug || sellerShop._id}`} className="text-pink-600 hover:underline">
+                  Voir la boutique
+                </Link>
+                <Link href="/seller/dashboard" className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600">
+                  Gérer ma boutique
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tabs when user owns a shop */}
+        {hasShop && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab('client')}
+                className={`px-4 py-2 rounded-md ${activeTab === 'client' ? 'bg-pink-500 text-white' : 'bg-white text-gray-700 border'}`}>
+                Client
+              </button>
+              <button
+                onClick={() => setActiveTab('seller')}
+                className={`px-4 py-2 rounded-md ${activeTab === 'seller' ? 'bg-pink-500 text-white' : 'bg-white text-gray-700 border'}`}>
+                Vendeur
+              </button>
+            </div>
+
+            {activeTab === 'seller' && (
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-lg shadow-sm p-4">
+                  <div className="text-sm text-gray-600">Commandes</div>
+                  <div className="text-2xl font-bold mt-2">{sellerStats?.totalOrders ?? '—'}</div>
+                </div>
+                <div className="bg-white rounded-lg shadow-sm p-4">
+                  <div className="text-sm text-gray-600">Produits</div>
+                  <div className="text-2xl font-bold mt-2">{sellerStats?.totalProducts ?? '—'}</div>
+                </div>
+                <div className="bg-white rounded-lg shadow-sm p-4">
+                  <div className="text-sm text-gray-600">Chiffre d'affaires</div>
+                  <div className="text-2xl font-bold mt-2">{sellerStats?.totalRevenue ? formatPrice(sellerStats.totalRevenue) : '—'}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
