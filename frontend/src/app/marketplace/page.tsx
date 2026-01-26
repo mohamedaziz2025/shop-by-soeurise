@@ -21,6 +21,7 @@ function MarketplacePageContent() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showMobileCategories, setShowMobileCategories] = useState(false);
 
   // Product filters (Level 3)
   const [minPrice, setMinPrice] = useState('');
@@ -120,7 +121,7 @@ function MarketplacePageContent() {
   return (
     <ModernLayout>
       <div className="min-h-screen bg-slate-50">
-        <div className="flex">
+        <div className="flex flex-col lg:flex-row">
           {/* Sidebar with categories and shops */}
           <MarketplaceSidebar
             categories={categories}
@@ -141,6 +142,18 @@ function MarketplacePageContent() {
             {/* Header Sticky: Breadcrumb + Search */}
             <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
               <div className="px-8 py-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    {/* Mobile categories button */}
+                    <button
+                      onClick={() => setShowMobileCategories(true)}
+                      className="lg:hidden inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-md"
+                    >
+                      <Home className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm text-gray-700">Univers</span>
+                    </button>
+                  </div>
+                </div>
                 {/* Breadcrumb */}
                 <div className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-3">
                   <Home className="w-4 h-4" />
@@ -192,7 +205,7 @@ function MarketplacePageContent() {
             </div>
 
             {/* Content: Shops or Products */}
-            <div className="p-8">
+            <div className="p-4 lg:p-8">
               {loading ? (
                 <div className="flex items-center justify-center py-32">
                   <LoadingSpinner size="lg" />
@@ -221,7 +234,7 @@ function MarketplacePageContent() {
                       </p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {Array.isArray(shops) && shops.map((shop, i) => (
                         <motion.div
                           key={shop._id}
@@ -237,8 +250,8 @@ function MarketplacePageContent() {
                     </div>
                   )}
                 </>
-              ) : (
-                <div className="flex gap-8">
+                  ) : (
+                <div className="flex flex-col lg:flex-row gap-8">
                   {/* Product Filters Sidebar (Niveau 3) */}
                   <aside className="hidden lg:block w-80 flex-shrink-0">
                     <div className="sticky top-32 bg-white rounded-[2.5rem] p-6 shadow-lg border border-gray-100">
@@ -333,6 +346,68 @@ function MarketplacePageContent() {
                       </button>
                     </div>
                   </aside>
+
+                  {/* Mobile Categories Sidebar */}
+                  <AnimatePresence>
+                    {showMobileCategories && (
+                      <>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          onClick={() => setShowMobileCategories(false)}
+                          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+                        />
+                        <motion.aside
+                          initial={{ x: -320 }}
+                          animate={{ x: 0 }}
+                          exit={{ x: -320 }}
+                          className="lg:hidden fixed left-0 top-0 h-full w-80 bg-white z-50 p-6 overflow-y-auto"
+                        >
+                          <div className="flex items-center justify-between mb-6">
+                            <h2 className="font-black text-xl">Univers</h2>
+                            <button onClick={() => setShowMobileCategories(false)}>
+                              <X className="w-6 h-6" />
+                            </button>
+                          </div>
+                          <div className="space-y-4">
+                            {categories.map((cat) => (
+                              <div key={cat}>
+                                <button
+                                  onClick={() => {
+                                    setCategory(cat);
+                                    setShowMobileCategories(false);
+                                  }}
+                                  className={`w-full text-left px-4 py-3 rounded-xl font-black text-lg transition-all ${
+                                    category === cat ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  {cat}
+                                </button>
+
+                                {category === cat && shops.length > 0 && (
+                                  <div className="ml-4 mt-2 space-y-1">
+                                    {shops.map((shop) => (
+                                      <button
+                                        key={shop._id}
+                                        onClick={() => {
+                                          handleShopClick(shop);
+                                          setShowMobileCategories(false);
+                                        }}
+                                        className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+                                      >
+                                        {shop.name}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </motion.aside>
+                      </>
+                    )}
+                  </AnimatePresence>
 
                   {/* Mobile Filters Sidebar */}
                   <AnimatePresence>
@@ -469,7 +544,7 @@ function MarketplacePageContent() {
                         </p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                         {Array.isArray(products) && products.map((product, i) => (
                           <motion.div
                             key={product._id}
