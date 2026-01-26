@@ -349,14 +349,23 @@ router.get('/users', auth, rbac(['ADMIN']), async (req, res) => {
   }
 });
 
-// Get all shops
-router.get('/shops', auth, rbac(['ADMIN']), async (req, res) => {
+// Approve product (Admin only) - Alternative route for compatibility
+router.put('/products/:id/approve', auth, rbac(['ADMIN']), async (req, res) => {
   try {
-    const shops = await Shop.find().sort({ createdAt: -1 });
-    res.json(shops);
+    const { isApproved, note } = req.body;
+
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { isApproved, approvalNote: note },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
-
-module.exports = router;

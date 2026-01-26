@@ -33,7 +33,7 @@ export default function PartnerLogos() {
 
   if (loading || partners.length === 0) return null;
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://72.62.71.97:4000';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://72.62.71.97:3001';
 
   return (
     <section className="py-16 bg-white border-y border-pink-50 overflow-hidden">

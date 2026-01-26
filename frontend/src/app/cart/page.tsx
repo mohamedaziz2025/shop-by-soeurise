@@ -73,7 +73,7 @@ export default function CartPage() {
     );
   }
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://72.62.71.97:4000';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://72.62.71.97:3001';
 
   return (
     <div className="min-h-screen bg-slate-50">

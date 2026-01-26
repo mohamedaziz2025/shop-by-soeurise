@@ -7,6 +7,39 @@ const rbac = require('../middleware/rbac');
 
 const router = express.Router();
 
+// Update profile (alias for PUT /:id)
+router.put('/profile', auth, [
+  body('firstName').optional().trim().isLength({ min: 1 }),
+  body('lastName').optional().trim().isLength({ min: 1 }),
+  body('email').optional().isEmail().normalizeEmail(),
+  body('phone').optional().trim(),
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const updates = {};
+    const allowedFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'postalCode', 'country'];
+
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true }).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get all users (Admin only)
 router.get('/', auth, rbac(['ADMIN']), async (req, res) => {
   try {

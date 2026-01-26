@@ -5,7 +5,13 @@ const rbac = require('../middleware/rbac');
 const router = express.Router();
 
 // Get user's orders
-router.get('/', auth, async (req, res) => {
+router.get('/my-orders', auth, async (req, res) => {
+  // TODO: Implement get user's orders
+  res.json({ message: 'Get my orders not implemented yet' });
+});
+
+// Get all orders
+router.get('/', auth, rbac(['ADMIN', 'SELLER']), async (req, res) => {
   // TODO: Implement orders logic
   res.json({ message: 'Orders functionality not implemented yet' });
 });
