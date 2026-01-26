@@ -48,6 +48,12 @@ export default function UserDashboardPage() {
   }, [user, router, isAuthenticated, isLoading]);
 
   const fetchDashboardData = async () => {
+    // Vérifier que l'utilisateur est toujours authentifié avant de faire les appels
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+
     try {
       const [ordersData, favoritesData] = await Promise.all([
         api.getMyOrders().catch(() => []),
@@ -67,7 +73,13 @@ export default function UserDashboardPage() {
         completedOrders,
         favorites: favoritesData.length,
       });
-    } catch (error) {
+    } catch (error: any) {
+      // Si erreur 401, l'utilisateur n'est plus authentifié
+      if (error.response?.status === 401) {
+        logout();
+        router.push('/login');
+        return;
+      }
       console.error('Erreur chargement dashboard:', error);
     } finally {
       setLoading(false);

@@ -168,4 +168,66 @@ router.delete('/:id', auth, rbac(['ADMIN']), async (req, res) => {
   }
 });
 
+// Favorites routes
+router.get('/favorites', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate('favorites').select('favorites');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user.favorites || []);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.put('/favorites/:productId', auth, async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.favorites) {
+      user.favorites = [];
+    }
+
+    if (user.favorites.includes(productId)) {
+      return res.status(400).json({ message: 'Product already in favorites' });
+    }
+
+    user.favorites.push(productId);
+    await user.save();
+
+    res.json({ message: 'Product added to favorites', favorites: user.favorites });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.delete('/favorites/:productId', auth, async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.favorites || !user.favorites.includes(productId)) {
+      return res.status(400).json({ message: 'Product not in favorites' });
+    }
+
+    user.favorites = user.favorites.filter(id => id.toString() !== productId);
+    await user.save();
+
+    res.json({ message: 'Product removed from favorites', favorites: user.favorites });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
