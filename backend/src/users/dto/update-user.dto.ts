@@ -42,6 +42,7 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   country?: string;
+}
 
 export class ChangePasswordDto {
   @IsString()
