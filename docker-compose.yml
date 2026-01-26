@@ -23,34 +23,24 @@ services:
     networks:
       - soeurise-network
 
-  # Backend API (NestJS)
+  # Backend API (Express)
   backend:
     build:
-      context: ./backend
+      context: ./backend-express
       dockerfile: Dockerfile
-    container_name: soeurise-backend
+    container_name: soeurise-backend-express
     restart: unless-stopped
     ports:
-      - "4000:4000"
+      - "3001:3001"
     environment:
       NODE_ENV: production
-      PORT: 4000
-      API_PREFIX: api/v1
-      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/soeurise?authSource=admin
+      PORT: 3001
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/soeurise-express?authSource=admin
       JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_change_in_production_64chars_minimum}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your_refresh_secret_change_in_production_64chars_minimum}
-      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
-      PLATFORM_COMMISSION_RATE: ${PLATFORM_COMMISSION_RATE:-20}
-      FRONTEND_URL: http://frontend:3000
     depends_on:
       - mongodb
     networks:
       - soeurise-network
-    volumes:
-      - ./backend/uploads:/app/uploads
 
   # Frontend (Next.js)
   frontend:
@@ -63,7 +53,7 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://72.62.71.97:4000/api/v1
+      NEXT_PUBLIC_API_URL: http://72.62.71.97:3001/api
       NEXT_PUBLIC_APP_URL: http://72.62.71.97:3000
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
     depends_on:
