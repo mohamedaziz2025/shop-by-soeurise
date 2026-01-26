@@ -321,6 +321,11 @@ class ApiClient {
 
   async getAllShops() {
     const { data } = await this.client.get('/admin/shops');
+    // Backend admin route may return { shops, totalPages, currentPage, total }
+    // normalize to return an array of shops for older callers
+    if (data && typeof data === 'object' && Array.isArray((data as any).shops)) {
+      return (data as any).shops;
+    }
     return data;
   }
 
