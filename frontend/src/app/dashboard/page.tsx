@@ -34,7 +34,7 @@ export default function UserDashboardPage() {
     }
 
     // Check for admin role
-    if (user.role === 'ADMIN') {
+    if ((user as any).role === 'ADMIN') {
       router.push('/admin/dashboard');
       return;
     }
