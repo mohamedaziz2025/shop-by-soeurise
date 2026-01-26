@@ -351,11 +351,11 @@ export class ShopsService {
   }
 
   /**
-   * Liste des partenaires (boutiques actives avec logo)
+   * Liste des partenaires (boutiques actives)
    */
   async getPartners() {
     return this.shopModel
-      .find({ status: ShopStatus.ACTIVE, logo: { $exists: true, $ne: null } })
+      .find({ status: ShopStatus.ACTIVE })
       .select('name slug logo categories')
       .sort({ isFeatured: -1, createdAt: -1 });
   }
