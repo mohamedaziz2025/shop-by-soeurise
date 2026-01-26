@@ -101,7 +101,7 @@ export default function AdminDashboardPage() {
 
   return (
     <AdminLayout title="Dashboard" subtitle="Aperçu général de la plateforme">
-      <div className="space-y-8">
+      <div className="space-y-8 min-h-0">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -111,7 +111,7 @@ export default function AdminDashboardPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Utilisateurs</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.totalUsers.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-900">{(stats?.totalUsers || 0).toLocaleString()}</p>
                 <div className="flex items-center mt-1">
                   <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
                   <span className="text-sm text-green-600">+12%</span>
@@ -143,7 +143,7 @@ export default function AdminDashboardPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Produits</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.totalProducts.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-900">{(stats?.totalProducts || 0).toLocaleString()}</p>
                 <div className="flex items-center mt-1">
                   <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
                   <span className="text-sm text-green-600">+8%</span>
@@ -175,7 +175,7 @@ export default function AdminDashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Revenus totaux</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalRevenue.toLocaleString()} €</p>
+                <p className="text-3xl font-bold text-gray-900">{(stats?.totalRevenue || 0).toLocaleString()} €</p>
                 <div className="flex items-center mt-2">
                   <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
                   <span className="text-sm text-green-600">+15% ce mois</span>
@@ -212,7 +212,7 @@ export default function AdminDashboardPage() {
               <h3 className="text-lg font-medium text-gray-900">Commandes récentes</h3>
             </div>
             <div className="divide-y divide-gray-200">
-              {stats?.recentOrders.map((order) => (
+              {Array.isArray(stats?.recentOrders) && stats.recentOrders.map((order) => (
                 <div key={order.id} className="px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -243,7 +243,7 @@ export default function AdminDashboardPage() {
               <h3 className="text-lg font-medium text-gray-900">Produits populaires</h3>
             </div>
             <div className="divide-y divide-gray-200">
-              {stats?.topProducts.map((product, index) => (
+              {Array.isArray(stats?.topProducts) && stats.topProducts.map((product, index) => (
                 <div key={product.id} className="px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
