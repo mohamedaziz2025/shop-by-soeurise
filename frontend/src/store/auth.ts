@@ -44,9 +44,11 @@ export const useAuthStore = create<AuthState>()(
           const { accessToken, refreshToken, user } = response;
           if (typeof window !== 'undefined') {
             localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken);
+            if (refreshToken) {
+              localStorage.setItem('refreshToken', refreshToken);
+            }
           }
-          set({ user, accessToken, refreshToken, isAuthenticated: true, isLoading: false });
+          set({ user, accessToken, refreshToken: refreshToken || null, isAuthenticated: true, isLoading: false });
 
           return { success: true };
         } catch (error: any) {
@@ -56,9 +58,11 @@ export const useAuthStore = create<AuthState>()(
       setAuth: (accessToken, refreshToken, user) => {
         if (typeof window !== 'undefined') {
           localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', refreshToken);
+          if (refreshToken) {
+            localStorage.setItem('refreshToken', refreshToken);
+          }
         }
-        set({ user, accessToken, refreshToken, isAuthenticated: true, isLoading: false });
+        set({ user, accessToken, refreshToken: refreshToken || null, isAuthenticated: true, isLoading: false });
       },
       logout: () => {
         if (typeof window !== 'undefined') {
@@ -72,12 +76,11 @@ export const useAuthStore = create<AuthState>()(
           // Check if we have tokens in localStorage
           if (typeof window !== 'undefined') {
             const accessToken = localStorage.getItem('accessToken');
-            const refreshToken = localStorage.getItem('refreshToken');
 
-            if (accessToken && refreshToken) {
+            if (accessToken) {
               // Try to get current user to validate tokens
               const user = await api.getCurrentUser();
-              set({ user, accessToken, refreshToken, isAuthenticated: true, isLoading: false });
+              set({ user, accessToken, refreshToken: null, isAuthenticated: true, isLoading: false });
               return;
             }
           }

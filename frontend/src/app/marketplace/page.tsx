@@ -236,7 +236,7 @@ function MarketplacePageContent() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                      {shops.map((shop, i) => (
+                      {Array.isArray(shops) && shops.map((shop, i) => (
                         <motion.div
                           key={shop._id}
                           initial={{ opacity: 0, y: 20 }}
@@ -484,7 +484,7 @@ function MarketplacePageContent() {
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-                        {products.map((product, i) => (
+                        {Array.isArray(products) && products.map((product, i) => (
                           <motion.div
                             key={product._id}
                             initial={{ opacity: 0, y: 20 }}
