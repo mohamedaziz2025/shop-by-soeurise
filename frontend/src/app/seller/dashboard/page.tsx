@@ -16,10 +16,9 @@ import Link from 'next/link';
 
 export default function SellerDashboardPage() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, logout, isAuthenticated, isLoading } = useAuthStore();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const { user, logout, isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
     if (isLoading) return; // Wait for auth initialization
