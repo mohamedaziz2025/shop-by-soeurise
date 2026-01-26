@@ -121,7 +121,8 @@ export default function ProductDetailPage() {
         {/* Main Content */}
         <main className="flex-1">
           <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
             {/* Images */}
             <div>
               {/* Image principale */}
@@ -285,6 +286,7 @@ export default function ProductDetailPage() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
 
