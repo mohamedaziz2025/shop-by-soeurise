@@ -71,7 +71,7 @@ export default function SellerDashboardPage() {
     return <LoadingSpinner size="lg" />;
   }
 
-  if (!user || user.role !== 'SELLER') {
+  if (!user) {
     return null;
   }
 

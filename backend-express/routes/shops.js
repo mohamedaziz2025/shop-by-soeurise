@@ -230,17 +230,33 @@ router.get('/seller/stats', auth, async (req, res) => {
       return res.status(404).json({ message: 'Shop not found' });
     }
 
-    // TODO: Calculate real stats from orders and products
+    // Count active products
+    const Product = require('../models/Product');
+    const activeProducts = await Product.countDocuments({
+      shopId: shop._id,
+      status: 'ACTIVE'
+    });
+
+    // For now, use shop stored values (should be updated periodically)
+    // TODO: Implement real-time calculation from orders when OrderItem model is available
     const stats = {
-      totalProducts: shop.totalProducts,
-      totalSales: shop.totalSales,
-      totalOrders: shop.totalOrders,
-      averageRating: shop.averageRating,
-      totalReviews: shop.totalReviews,
+      // Legacy fields
+      totalProducts: activeProducts,
+      totalSales: shop.totalSales || 0,
+      totalOrders: shop.totalOrders || 0,
+      averageRating: shop.averageRating || 0,
+      totalReviews: shop.totalReviews || 0,
+
+      // Frontend expected fields
+      revenue: shop.totalSales || 0,
+      ordersCount: shop.totalOrders || 0,
+      pendingOrders: 0, // TODO: calculate from orders
+      activeProducts: activeProducts,
     };
 
     res.json(stats);
   } catch (error) {
+    console.error('Error fetching seller stats:', error);
     res.status(500).json({ message: error.message });
   }
 });
