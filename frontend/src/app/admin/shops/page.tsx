@@ -74,7 +74,7 @@ export default function AdminShopsPage() {
   };
 
   const filterShops = () => {
-    let filtered = shops;
+    let filtered = Array.isArray(shops) ? shops : [];
 
     if (searchTerm) {
       filtered = filtered.filter(shop =>

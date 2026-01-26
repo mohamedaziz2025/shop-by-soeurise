@@ -78,7 +78,7 @@ export default function AdminProductsPage() {
   };
 
   const filterProducts = () => {
-    let filtered = products;
+    let filtered = Array.isArray(products) ? products : [];
 
     if (searchTerm) {
       filtered = filtered.filter(product =>
@@ -152,7 +152,7 @@ export default function AdminProductsPage() {
     }
   };
 
-  const categories = [...new Set(products.map(p => p.category))];
+  const categories = [...new Set(Array.isArray(products) ? products.map(p => p.category) : [])];
 
   if (isLoading) {
     return (
@@ -202,7 +202,7 @@ export default function AdminProductsPage() {
                 className="flex-1 sm:w-44 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">Toutes catégories</option>
-                {categories.map(cat => (
+                {Array.isArray(categories) && categories.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
@@ -232,7 +232,7 @@ export default function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredProducts.map((product) => {
+                {Array.isArray(filteredProducts) && filteredProducts.map((product) => {
                   const productId = product._id || product.id || '';
                   return (
                     <tr key={productId} className="hover:bg-gray-50">
@@ -340,7 +340,7 @@ export default function AdminProductsPage() {
 
           {/* Mobile Cards */}
           <div className="lg:hidden divide-y divide-gray-200">
-            {filteredProducts.map((product) => {
+            {Array.isArray(filteredProducts) && filteredProducts.map((product) => {
               const productId = product._id || product.id || '';
               return (
                 <div key={productId} className="p-4 hover:bg-gray-50">

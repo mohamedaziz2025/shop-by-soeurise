@@ -65,7 +65,7 @@ export default function AdminUsersPage() {
   };
 
   const filterUsers = () => {
-    let filtered = users;
+    let filtered = Array.isArray(users) ? users : [];
 
     if (searchTerm) {
       filtered = filtered.filter(user =>
@@ -221,8 +221,8 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
+                {Array.isArray(filteredUsers) && filteredUsers.map((user) => (
+                  <tr key={user.id || user.email} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
@@ -230,7 +230,7 @@ export default function AdminUsersPage() {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</div>
-                          <div className="text-xs text-gray-500">ID: {user.id.substring(0, 8)}...</div>
+                          <div className="text-xs text-gray-500">ID: {user.id ? user.id.substring(0, 8) + '...' : 'N/A'}</div>
                         </div>
                       </div>
                     </td>
@@ -261,12 +261,12 @@ export default function AdminUsersPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="relative inline-block">
                         <button
-                          onClick={() => setShowActionMenu(showActionMenu === user.id ? null : user.id)}
+                          onClick={() => setShowActionMenu(showActionMenu === (user.id || user.email) ? null : (user.id || user.email))}
                           className="text-gray-400 hover:text-gray-600 p-1"
                         >
                           <MoreHorizontal className="w-5 h-5" />
                         </button>
-                        {showActionMenu === user.id && (
+                        {showActionMenu === (user.id || user.email) && (
                           <>
                             <div className="fixed inset-0 z-10" onClick={() => setShowActionMenu(null)} />
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border">
@@ -279,14 +279,14 @@ export default function AdminUsersPage() {
                                 </button>
                                 {user.status !== 'SUSPENDED' ? (
                                   <button
-                                    onClick={() => handleBanUser(user.id)}
+                                    onClick={() => user.id && handleBanUser(user.id)}
                                     className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
                                   >
                                     <Ban className="w-4 h-4 mr-2" />Bannir
                                   </button>
                                 ) : (
                                   <button
-                                    onClick={() => handleUnbanUser(user.id)}
+                                    onClick={() => user.id && handleUnbanUser(user.id)}
                                     className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left"
                                   >
                                     <CheckCircle className="w-4 h-4 mr-2" />Débannir
@@ -316,8 +316,8 @@ export default function AdminUsersPage() {
 
           {/* Mobile Cards */}
           <div className="lg:hidden divide-y divide-gray-200">
-            {filteredUsers.map((user) => (
-              <div key={user.id} className="p-4 hover:bg-gray-50">
+            {Array.isArray(filteredUsers) && filteredUsers.map((user) => (
+              <div key={user.id || user.email} className="p-4 hover:bg-gray-50">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
@@ -329,7 +329,7 @@ export default function AdminUsersPage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => setShowActionMenu(showActionMenu === user.id ? null : user.id)}
+                    onClick={() => setShowActionMenu(showActionMenu === (user.id || user.email) ? null : (user.id || user.email))}
                     className="ml-2 text-gray-400"
                   >
                     <MoreHorizontal className="w-5 h-5" />
@@ -360,11 +360,11 @@ export default function AdminUsersPage() {
                           <Eye className="w-4 h-4 mr-2" />Voir
                         </button>
                         {user.status !== 'SUSPENDED' ? (
-                          <button onClick={() => handleBanUser(user.id)} className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left">
+                          <button onClick={() => user.id && handleBanUser(user.id)} className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left">
                             <Ban className="w-4 h-4 mr-2" />Bannir
                           </button>
                         ) : (
-                          <button onClick={() => handleUnbanUser(user.id)} className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left">
+                          <button onClick={() => user.id && handleUnbanUser(user.id)} className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left">
                             <CheckCircle className="w-4 h-4 mr-2" />Débannir
                           </button>
                         )}

@@ -78,7 +78,7 @@ export default function AdminOrdersPage() {
   };
 
   const filterOrders = () => {
-    let filtered = orders;
+    let filtered = Array.isArray(orders) ? orders : [];
 
     if (searchTerm) {
       filtered = filtered.filter(order =>
@@ -205,7 +205,7 @@ export default function AdminOrdersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredOrders.map((order) => {
+                {Array.isArray(filteredOrders) && filteredOrders.map((order) => {
                   const orderId = order._id || order.id || '';
                   return (
                     <tr key={orderId} className="hover:bg-gray-50">
@@ -315,7 +315,7 @@ export default function AdminOrdersPage() {
 
           {/* Mobile Cards */}
           <div className="lg:hidden divide-y divide-gray-200">
-            {filteredOrders.map((order) => {
+            {Array.isArray(filteredOrders) && filteredOrders.map((order) => {
               const orderId = order._id || order.id || '';
               return (
                 <div key={orderId} className="p-4 hover:bg-gray-50">
