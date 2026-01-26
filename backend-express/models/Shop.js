@@ -11,6 +11,15 @@ const shopSchema = new mongoose.Schema({
   banner: String,
   status: { type: String, enum: shopStatusEnum, default: 'ACTIVE' },
   categories: [String],
+  // Contact information
+  phone: String,
+  address: String,
+  city: String,
+  postalCode: String,
+  country: { type: String, default: 'France' },
+  // Business information
+  businessType: String, // 'individual', 'company'
+  siret: String,
   shippingConfig: {
     enabled: { type: Boolean, default: true },
     flatRate: Number,
@@ -20,6 +29,7 @@ const shopSchema = new mongoose.Schema({
     shippingZones: [String],
   },
   returnPolicy: String,
+  shippingPolicy: String,
   privacyPolicy: String,
   socialMedia: {
     instagram: String,

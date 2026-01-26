@@ -1,15 +1,45 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const Shop = require('../models/Shop');
 const auth = require('../middleware/auth');
 const rbac = require('../middleware/rbac');
 
 const router = express.Router();
 
+// Configuration Multer pour l'upload de logos
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, '..', 'uploads', 'logos');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Seules les images sont autorisées'));
+    }
+  }
+});
+
 // Get all shops (public)
 router.get('/', async (req, res) => {
   try {
-    const { status = 'ACTIVE', category, isFeatured, page = 1, limit = 10 } = req.query;
+    const { status = 'ACTIVE', category, isFeatured } = req.query;
 
     const query = { status };
     if (category) query.categories = category;
@@ -17,18 +47,38 @@ router.get('/', async (req, res) => {
 
     const shops = await Shop.find(query)
       .populate('sellerId', 'firstName lastName')
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .sort({ isFeatured: -1, averageRating: -1, createdAt: -1 });
 
-    const total = await Shop.countDocuments(query);
+    res.json(shops);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
-    res.json({
-      shops,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-      total,
-    });
+// Get partners (public) - AVANT /:id
+router.get('/partners', async (req, res) => {
+  try {
+    const partners = await Shop.find({ isFeatured: true, status: 'ACTIVE' })
+      .populate('sellerId', 'firstName lastName')
+      .limit(10);
+
+    res.json(partners);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get shop by slug (public) - AVANT /:id
+router.get('/slug/:slug', async (req, res) => {
+  try {
+    const shop = await Shop.findOne({ slug: req.params.slug })
+      .populate('sellerId', 'firstName lastName email');
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json(shop);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -50,37 +100,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Get shop by slug (public)
-router.get('/slug/:slug', async (req, res) => {
-  try {
-    const shop = await Shop.findOne({ slug: req.params.slug })
-      .populate('sellerId', 'firstName lastName email');
-
-    if (!shop) {
-      return res.status(404).json({ message: 'Shop not found' });
-    }
-
-    res.json(shop);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Get partners (public)
-router.get('/partners/list', async (req, res) => {
-  try {
-    const partners = await Shop.find({ isFeatured: true, status: 'ACTIVE' })
-      .populate('sellerId', 'firstName lastName')
-      .limit(10);
-
-    res.json(partners);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
 // Create shop (Authenticated users)
-router.post('/', auth, [
+router.post('/', auth, upload.single('logo'), [
   body('name').trim().isLength({ min: 1 }),
   body('description').isLength({ min: 1 }),
 ], async (req, res) => {
@@ -101,6 +122,16 @@ router.post('/', auth, [
       sellerId: req.user._id,
       slug: req.body.slug || req.body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     };
+
+    // Convertir category en categories si nécessaire
+    if (req.body.category && !req.body.categories) {
+      shopData.categories = [req.body.category];
+    }
+
+    // Ajouter le logo si uploadé
+    if (req.file) {
+      shopData.logo = `/uploads/logos/${req.file.filename}`;
+    }
 
     const shop = new Shop(shopData);
     await shop.save();
@@ -146,6 +177,29 @@ router.put('/seller/my-shop', auth, async (req, res) => {
     );
 
     res.json(updatedShop);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Upload shop logo (Authenticated users, own shop)
+router.post('/seller/logo', auth, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const shop = await Shop.findOne({ sellerId: req.user._id });
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    const publicUrl = `/uploads/logos/${req.file.filename}`;
+    shop.logo = publicUrl;
+    await shop.save();
+
+    res.json({ logo: publicUrl, shop });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
