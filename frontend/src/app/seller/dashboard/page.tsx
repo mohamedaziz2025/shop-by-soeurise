@@ -19,6 +19,7 @@ export default function SellerDashboardPage() {
   const { user, logout, isAuthenticated, isLoading } = useAuthStore();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState('30d');
 
   useEffect(() => {
     if (isLoading) return; // Wait for auth initialization
