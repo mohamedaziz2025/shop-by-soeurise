@@ -373,9 +373,10 @@ router.put('/products/:id/approve', auth, rbac(['ADMIN']), async (req, res) => {
 // Get all shops (Admin only)
 router.get('/shops', auth, rbac(['ADMIN']), async (req, res) => {
   try {
-    const { status, page = 1, limit = 10 } = req.query;
+    const { status, category, page = 1, limit = 10 } = req.query;
     const query = {};
     if (status) query.status = status;
+    if (category) query.category = category;
 
     const shops = await Shop.find(query)
       .populate('sellerId', 'firstName lastName email')
@@ -391,6 +392,125 @@ router.get('/shops', auth, rbac(['ADMIN']), async (req, res) => {
       currentPage: page,
       total,
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get shop by ID (Admin only)
+router.get('/shops/:id', auth, rbac(['ADMIN']), async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.id)
+      .populate('sellerId', 'firstName lastName email');
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json(shop);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update shop (Admin only)
+router.put('/shops/:id', auth, rbac(['ADMIN']), async (req, res) => {
+  try {
+    const { name, description, category, location } = req.body;
+
+    const shop = await Shop.findByIdAndUpdate(
+      req.params.id,
+      { name, description, category, location },
+      { new: true }
+    ).populate('sellerId', 'firstName lastName email');
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json(shop);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete shop (Admin only)
+router.delete('/shops/:id', auth, rbac(['ADMIN']), async (req, res) => {
+  try {
+    const shop = await Shop.findByIdAndDelete(req.params.id);
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json({ message: 'Shop deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Approve shop (Admin only)
+router.put('/shops/:id/approve', auth, rbac(['ADMIN']), async (req, res) => {
+  try {
+    const shop = await Shop.findByIdAndUpdate(
+      req.params.id,
+      { status: 'APPROVED' },
+      { new: true }
+    ).populate('sellerId', 'firstName lastName email');
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json(shop);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Reject shop (Admin only)
+router.put('/shops/:id/reject', auth, rbac(['ADMIN']), async (req, res) => {
+  try {
+    const { reason } = req.body;
+
+    const shop = await Shop.findByIdAndUpdate(
+      req.params.id,
+      { 
+        status: 'REJECTED',
+        rejectionReason: reason 
+      },
+      { new: true }
+    ).populate('sellerId', 'firstName lastName email');
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json(shop);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Suspend shop (Admin only)
+router.put('/shops/:id/suspend', auth, rbac(['ADMIN']), async (req, res) => {
+  try {
+    const { reason } = req.body;
+
+    const shop = await Shop.findByIdAndUpdate(
+      req.params.id,
+      { 
+        status: 'SUSPENDED',
+        suspensionReason: reason 
+      },
+      { new: true }
+    ).populate('sellerId', 'firstName lastName email');
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json(shop);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

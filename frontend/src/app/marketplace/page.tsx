@@ -8,6 +8,7 @@ import ShopCard from '@/components/ShopCard';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ModernLayout from '@/components/ModernLayout';
+import MarketplaceSidebar from '@/components/MarketplaceSidebar';
 import { Search, ChevronRight, Home, Filter, X } from 'lucide-react';
 
 function MarketplacePageContent() {
@@ -120,35 +121,20 @@ function MarketplacePageContent() {
     <ModernLayout>
       <div className="min-h-screen bg-slate-50">
         <div className="flex">
-          {/* Sidebar: Aiguillage Univers (Niveau 1) */}
-          <aside className="hidden lg:block w-64 bg-white border-r border-gray-200 min-h-screen sticky top-0">
-            <div className="p-6">
-              <h2 className="text-xs uppercase tracking-widest font-black text-gray-400 mb-4">
-                Univers
-              </h2>
-              <nav className="space-y-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => {
-                      setCategory(cat);
-                      setSelectedShop(null);
-                      setView('shops');
-                    }}
-                    className={`w-full text-left px-4 py-3 rounded-xl font-black text-lg transition-all ${
-                      category === cat
-                        ? cat === 'Mode'
-                          ? 'bg-indigo-50 text-indigo-600 border-l-4 border-indigo-600'
-                          : 'bg-rose-50 text-rose-600 border-l-4 border-rose-600'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </aside>
+          {/* Sidebar with categories and shops */}
+          <MarketplaceSidebar
+            categories={categories}
+            selectedCategory={category}
+            shops={shops}
+            selectedShop={selectedShop}
+            onCategorySelect={(cat) => {
+              setCategory(cat);
+              setSelectedShop(null);
+              setView('shops');
+            }}
+            onShopSelect={handleShopClick}
+            accentColor={accentColor}
+          />
 
           {/* Main Content */}
           <main className="flex-1">

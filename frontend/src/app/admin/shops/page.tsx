@@ -47,10 +47,15 @@ export default function AdminShopsPage() {
   const [filteredShops, setFilteredShops] = useState<Shop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
-  const [showActionMenu, setShowActionMenu] = useState<string | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingShop, setEditingShop] = useState<Shop | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    description: '',
+    category: '',
+    location: ''
+  });
 
   useEffect(() => {
     fetchShops();
@@ -58,7 +63,7 @@ export default function AdminShopsPage() {
 
   useEffect(() => {
     filterShops();
-  }, [shops, searchTerm, statusFilter]);
+  }, [shops, searchTerm, statusFilter, categoryFilter]);
 
   const fetchShops = async () => {
     try {
@@ -86,6 +91,10 @@ export default function AdminShopsPage() {
 
     if (statusFilter !== 'all') {
       filtered = filtered.filter(shop => shop.status === statusFilter);
+    }
+
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter(shop => shop.category === categoryFilter);
     }
 
     setFilteredShops(filtered);
@@ -141,16 +150,42 @@ export default function AdminShopsPage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedShop) return;
+  const handleActivate = async (shopId: string) => {
     try {
-      const shopId = selectedShop._id || selectedShop.id || '';
-      await api.deleteShopAdmin(shopId);
+      await api.approveShopAdmin(shopId);
       await fetchShops();
-      setShowDeleteConfirm(false);
-      setSelectedShop(null);
+      setShowActionMenu(null);
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
+      console.error('Erreur lors de l\'activation:', error);
+    }
+  };
+
+  const handleViewShop = (shop: Shop) => {
+    window.open(`/shops/${shop.slug || shop._id}`, '_blank');
+  };
+
+  const handleEditShop = (shop: Shop) => {
+    setEditingShop(shop);
+    setEditForm({
+      name: shop.name,
+      description: shop.description || '',
+      category: shop.category,
+      location: shop.location || ''
+    });
+    setShowEditModal(true);
+    setShowActionMenu(null);
+  };
+
+  const handleUpdateShop = async () => {
+    if (!editingShop) return;
+    try {
+      const shopId = editingShop._id || editingShop.id || '';
+      await api.updateShopAdmin(shopId, editForm);
+      await fetchShops();
+      setShowEditModal(false);
+      setEditingShop(null);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour:', error);
     }
   };
 
@@ -193,6 +228,16 @@ export default function AdminShopsPage() {
               <option value="PENDING_APPROVAL">En attente</option>
               <option value="REJECTED">Rejeté</option>
               <option value="SUSPENDED">Suspendu</option>
+            </select>
+
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="sm:w-44 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Toutes catégories</option>
+              <option value="Mode">Mode</option>
+              <option value="Cosmétiques">Cosmétiques</option>
             </select>
           </div>
         </div>
@@ -279,10 +324,16 @@ export default function AdminShopsPage() {
                               <div className="fixed inset-0 z-10" onClick={() => setShowActionMenu(null)} />
                               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border">
                                 <div className="py-1">
-                                  <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
-                                    <Eye className="w-4 h-4 mr-2" />Voir
+                                  <button 
+                                    onClick={() => handleViewShop(shop)}
+                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                  >
+                                    <Eye className="w-4 h-4 mr-2" />Voir la boutique
                                   </button>
-                                  <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                                  <button 
+                                    onClick={() => handleEditShop(shop)}
+                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                  >
                                     <Edit className="w-4 h-4 mr-2" />Modifier
                                   </button>
                                   {shop.status === 'PENDING_APPROVAL' && (
@@ -307,6 +358,14 @@ export default function AdminShopsPage() {
                                       className="flex items-center px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 w-full text-left"
                                     >
                                       <AlertTriangle className="w-4 h-4 mr-2" />Suspendre
+                                    </button>
+                                  )}
+                                  {shop.status === 'SUSPENDED' && (
+                                    <button
+                                      onClick={() => handleActivate(shopId)}
+                                      className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left"
+                                    >
+                                      <CheckCircle className="w-4 h-4 mr-2" />Activer
                                     </button>
                                   )}
                                   <button
@@ -378,8 +437,11 @@ export default function AdminShopsPage() {
                       <div className="fixed inset-0 z-10" onClick={() => setShowActionMenu(null)} />
                       <div className="absolute right-4 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border">
                         <div className="py-1">
-                          <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
-                            <Eye className="w-4 h-4 mr-2" />Voir
+                          <button 
+                            onClick={() => handleViewShop(shop)}
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          >
+                            <Eye className="w-4 h-4 mr-2" />Voir la boutique
                           </button>
                           {shop.status === 'PENDING_APPROVAL' && (
                             <>
@@ -394,6 +456,11 @@ export default function AdminShopsPage() {
                           {shop.status === 'APPROVED' && (
                             <button onClick={() => handleSuspend(shopId)} className="flex items-center px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 w-full text-left">
                               <AlertTriangle className="w-4 h-4 mr-2" />Suspendre
+                            </button>
+                          )}
+                          {shop.status === 'SUSPENDED' && (
+                            <button onClick={() => handleActivate(shopId)} className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left">
+                              <CheckCircle className="w-4 h-4 mr-2" />Activer
                             </button>
                           )}
                           <button onClick={() => {
@@ -420,6 +487,74 @@ export default function AdminShopsPage() {
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && editingShop && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={() => setShowEditModal(false)} />
+            <div className="relative bg-white rounded-lg p-6 max-w-md w-full">
+              <div className="flex items-center mb-4">
+                <Edit className="h-6 w-6 text-blue-600 mr-2" />
+                <h3 className="text-lg font-medium">Modifier la boutique</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                  <select
+                    value={editForm.category}
+                    onChange={(e) => setEditForm({...editForm, category: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Mode">Mode</option>
+                    <option value="Cosmétiques">Cosmétiques</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Localisation</label>
+                  <input
+                    type="text"
+                    value={editForm.location}
+                    onChange={(e) => setEditForm({...editForm, location: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-2 justify-end mt-6">
+                <button onClick={() => setShowEditModal(false)} className="px-4 py-2 border rounded-md hover:bg-gray-50">
+                  Annuler
+                </button>
+                <button onClick={handleUpdateShop} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                  Mettre à jour
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Modal */}
       {showDeleteConfirm && selectedShop && (

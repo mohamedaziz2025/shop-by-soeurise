@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useCartStore } from '@/store/cart';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import MarketplaceSidebar from '@/components/MarketplaceSidebar';
 import { Star, Truck, ShieldCheck, Package, Heart } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import Image from 'next/image';
@@ -19,6 +20,12 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+
+  // Sidebar data
+  const [categories] = useState(['Mode', 'Cosmétiques']);
+  const [currentCategory, setCurrentCategory] = useState<string>('Mode');
+  const [shops, setShops] = useState<any[]>([]);
+  const [sidebarLoading, setSidebarLoading] = useState(false);
 
   const { addItem } = useCartStore();
 
@@ -38,6 +45,13 @@ export default function ProductDetailPage() {
       if (data?.variants && data.variants.length > 0) {
         setSelectedVariant(data.variants[0]);
       }
+
+      // Determine category from product
+      const productCategory = productData?.shop?.category || productData?.category || 'Mode';
+      setCurrentCategory(productCategory);
+
+      // Fetch shops for this category
+      await fetchShopsForCategory(productCategory);
     } catch (error) {
       console.error('Erreur chargement produit:', error);
     } finally {
@@ -45,22 +59,30 @@ export default function ProductDetailPage() {
     }
   };
 
-  const handleAddToCart = async () => {
-    setAdding(true);
+  const fetchShopsForCategory = async (category: string) => {
+    setSidebarLoading(true);
     try {
-      await addItem({
-        productId: product._id,
-        variantId: selectedVariant?._id,
-        quantity,
-      });
-      alert('Produit ajouté au panier !');
+      const filters: any = { status: 'ACTIVE', category };
+      const data = await api.getShops(filters);
+      setShops(data);
     } catch (error) {
-      console.error('Erreur ajout panier:', error);
-      alert('Erreur lors de l\'ajout au panier');
+      console.error('Erreur chargement boutiques:', error);
     } finally {
-      setAdding(false);
+      setSidebarLoading(false);
     }
   };
+
+  const handleCategorySelect = async (category: string) => {
+    setCurrentCategory(category);
+    await fetchShopsForCategory(category);
+  };
+
+  const handleShopSelect = (shop: any) => {
+    // Navigate to shop page
+    window.location.href = `/shops/${shop.slug}`;
+  };
+
+  const accentColor = currentCategory === 'Mode' ? 'indigo' : 'rose';
 
   if (loading) {
     return <LoadingSpinner size="lg" />;
@@ -83,8 +105,22 @@ export default function ProductDetailPage() {
   const currentStock = selectedVariant?.stock || product.stock;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-slate-50">
+      <div className="flex">
+        {/* Sidebar */}
+        <MarketplaceSidebar
+          categories={categories}
+          selectedCategory={currentCategory}
+          shops={shops}
+          selectedShop={product?.shop}
+          onCategorySelect={handleCategorySelect}
+          onShopSelect={handleShopSelect}
+          accentColor={accentColor}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1">
+          <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
             {/* Images */}
@@ -258,6 +294,7 @@ export default function ProductDetailPage() {
           <h2 className="text-2xl font-bold mb-4">Avis clients</h2>
           <p className="text-gray-500">Aucun avis pour le moment</p>
         </div>
+        </main>
       </div>
     </div>
   );
