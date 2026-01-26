@@ -13,57 +13,6 @@ class ApiClient {
       },
       withCredentials: false,
     });
-
-    // Intercepteur de requête pour ajouter le token
-    this.client.interceptors.request.use(
-      (config) => {
-        if (typeof window !== 'undefined') {
-          const token = localStorage.getItem('accessToken');
-          if (token) {
-            config.headers = config.headers || {};
-            config.headers['Authorization'] = `Bearer ${token}`;
-          }
-        }
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
-
-    // Intercepteur de réponse pour gérer le refresh token
-    this.client.interceptors.response.use(
-      (response) => response,
-      async (error: AxiosError) => {
-        const originalRequest = error.config as any;
-
-        if (error.response?.status === 401 && !originalRequest._retry) {
-          originalRequest._retry = true;
-
-          if (typeof window !== 'undefined') {
-            const refreshToken = localStorage.getItem('refreshToken');
-
-            if (refreshToken) {
-              try {
-                const { data } = await axios.post(`${API_URL}/auth/refresh`, {
-                  refreshToken,
-                });
-
-                localStorage.setItem('accessToken', data.accessToken);
-                localStorage.setItem('refreshToken', data.refreshToken);
-
-                originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-                return this.client(originalRequest);
-              } catch (refreshError) {
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
-                window.location.href = '/login';
-              }
-            }
-          }
-        }
-
-        return Promise.reject(error);
-      }
-    );
   }
 
   // Auth
