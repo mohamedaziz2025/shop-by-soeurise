@@ -370,4 +370,86 @@ router.put('/products/:id/approve', auth, rbac(['ADMIN']), async (req, res) => {
   }
 });
 
+// Get all shops (Admin only)
+router.get('/shops', auth, rbac(['ADMIN']), async (req, res) => {
+  try {
+    const { status, page = 1, limit = 10 } = req.query;
+    const query = {};
+    if (status) query.status = status;
+
+    const shops = await Shop.find(query)
+      .populate('sellerId', 'firstName lastName email')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Shop.countDocuments(query);
+
+    res.json({
+      shops,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get all products (Admin only)
+router.get('/products', auth, rbac(['ADMIN']), async (req, res) => {
+  try {
+    const { status, isApproved, page = 1, limit = 10 } = req.query;
+    const query = {};
+    if (status) query.status = status;
+    if (isApproved !== undefined) query.isApproved = isApproved === 'true';
+
+    const products = await Product.find(query)
+      .populate('shopId', 'name slug')
+      .populate('sellerId', 'firstName lastName email')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Product.countDocuments(query);
+
+    res.json({
+      products,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get all orders (Admin only)
+router.get('/orders', auth, rbac(['ADMIN']), async (req, res) => {
+  try {
+    const { status, paymentStatus, page = 1, limit = 10 } = req.query;
+    const query = { isSubOrder: false };
+    if (status) query.status = status;
+    if (paymentStatus) query.paymentStatus = paymentStatus;
+
+    const orders = await Order.find(query)
+      .populate('customerId', 'firstName lastName email')
+      .populate('items.productId', 'name slug mainImage')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Order.countDocuments(query);
+
+    res.json({
+      orders,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

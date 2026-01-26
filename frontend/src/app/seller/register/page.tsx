@@ -14,6 +14,7 @@ export default function SellerRegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const [shopData, setShopData] = useState({
     name: '',
@@ -28,20 +29,40 @@ export default function SellerRegisterPage() {
     shippingPolicy: '',
     businessType: 'individual',
     siret: '',
+    logo: null as File | null,
   });
 
   const categories = [
-    'Mode & Vêtements',
-    'Accessoires',
-    'Beauté & Cosmétiques',
-    'Maison & Décoration',
-    'Bijoux',
-    'Artisanat',
-    'Livres & Éducation',
-    'Santé & Bien-être',
-    'Enfants & Bébés',
-    'Alimentaire',
+    'Mode',
+    'Cosmétique',
   ];
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Vérifier le type de fichier
+      if (!file.type.startsWith('image/')) {
+        setError('Veuillez sélectionner un fichier image valide');
+        return;
+      }
+      
+      // Vérifier la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Le fichier ne doit pas dépasser 5MB');
+        return;
+      }
+
+      setShopData({ ...shopData, logo: file });
+      setError('');
+
+      // Créer l'aperçu
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -233,6 +254,62 @@ export default function SellerRegisterPage() {
                 />
                 <p className="text-sm text-gray-500 mt-1">
                   Minimum 50 caractères
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Logo de votre boutique
+                </label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-pink-400 transition-colors">
+                  <div className="space-y-1 text-center">
+                    {logoPreview ? (
+                      <div className="flex flex-col items-center">
+                        <img
+                          src={logoPreview}
+                          alt="Aperçu du logo"
+                          className="w-24 h-24 object-cover rounded-lg mb-4"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShopData({ ...shopData, logo: null });
+                            setLogoPreview(null);
+                          }}
+                          className="text-sm text-red-600 hover:text-red-800"
+                        >
+                          Supprimer
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="flex text-sm text-gray-600">
+                          <label
+                            htmlFor="logo-upload"
+                            className="relative cursor-pointer bg-white rounded-md font-medium text-pink-600 hover:text-pink-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-pink-500"
+                          >
+                            <span>Télécharger un fichier</span>
+                            <input
+                              id="logo-upload"
+                              name="logo-upload"
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={handleLogoChange}
+                            />
+                          </label>
+                          <p className="pl-1">ou glisser-déposer</p>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          PNG, JPG, GIF jusqu'à 5MB
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Recommandé : 200x200px minimum, format carré
                 </p>
               </div>
 

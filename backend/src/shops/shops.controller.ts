@@ -69,7 +69,24 @@ export class ShopsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@CurrentUser() user: any, @Body() createShopDto: CreateShopDto) {
+  @UseInterceptors(
+    FileInterceptor('logo', {
+      storage: diskStorage({
+        destination: './uploads/logos',
+        filename: (req, file, cb) => {
+          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const name = file.originalname.split('.')[0];
+          const ext = extname(file.originalname);
+          cb(null, `${unique}${ext}`);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    })
+  )
+  async create(@CurrentUser() user: any, @Body() createShopDto: CreateShopDto, @UploadedFile() logo?: Express.Multer.File) {
+    if (logo) {
+      createShopDto.logo = `/uploads/logos/${logo.filename}`;
+    }
     return this.shopsService.create(user.userId, createShopDto);
   }
 
