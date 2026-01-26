@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 export default function UserDashboardPage() {
   const router = useRouter();
-  const { user, logout, isAuthenticated } = useAuthStore();
+  const { user, logout, isAuthenticated, isLoading } = useAuthStore();
   const [stats, setStats] = useState<any>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<any[]>([]);
@@ -23,6 +23,8 @@ export default function UserDashboardPage() {
   };
 
   useEffect(() => {
+    if (isLoading) return; // Wait for auth initialization
+
     if (!isAuthenticated) {
       router.push('/login');
       return;
@@ -43,7 +45,7 @@ export default function UserDashboardPage() {
     }
 
     fetchDashboardData();
-  }, [user, router, isAuthenticated]);
+  }, [user, router, isAuthenticated, isLoading]);
 
   const fetchDashboardData = async () => {
     try {

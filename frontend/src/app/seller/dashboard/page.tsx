@@ -19,10 +19,12 @@ export default function SellerDashboardPage() {
   const { user, logout } = useAuthStore();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('30d');
+  const { user, logout, isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
-    if (!user) {
+    if (isLoading) return; // Wait for auth initialization
+
+    if (!isAuthenticated || !user) {
       router.push('/login');
       return;
     }
@@ -31,7 +33,7 @@ export default function SellerDashboardPage() {
       return;
     }
     fetchStats();
-  }, [user, router, timeRange]);
+  }, [user, router, timeRange, isAuthenticated, isLoading]);
 
   const fetchStats = async () => {
     try {

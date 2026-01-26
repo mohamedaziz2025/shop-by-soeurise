@@ -10,15 +10,17 @@ export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
+    if (isLoading) return; // Wait for auth initialization
+
     if (!isAuthenticated) {
       router.push('/login');
       return;
     }
     loadFavorites();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isLoading]);
 
   const loadFavorites = async () => {
     try {
