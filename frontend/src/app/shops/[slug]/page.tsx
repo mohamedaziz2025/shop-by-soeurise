@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import MarketplaceSidebar from '@/components/MarketplaceSidebar';
 import { Star, Package, MapPin, Truck, SlidersHorizontal, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -16,6 +17,8 @@ export default function ShopDetailPage() {
   const [shop, setShop] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [shops, setShops] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Filter state
   const [minPrice, setMinPrice] = useState('');
@@ -41,9 +44,22 @@ export default function ShopDetailPage() {
     try {
       const shopData = await api.getShopBySlug(slug);
       setShop(shopData);
+      // set category and fetch nearby shops in same category
+      const cat = shopData.categories?.includes('Mode') ? 'Mode' : shopData.categories?.includes('Cosmétiques') ? 'Cosmétiques' : null;
+      setSelectedCategory(cat);
+      if (cat) fetchShopsByCategory(cat);
     } catch (error) {
       console.error('Erreur chargement boutique:', error);
       setLoading(false);
+    }
+  };
+
+  const fetchShopsByCategory = async (cat: string) => {
+    try {
+      const data = await api.getShops({ status: 'ACTIVE', category: cat }).catch(() => []);
+      setShops(data || []);
+    } catch (err) {
+      setShops([]);
     }
   };
 
@@ -295,7 +311,20 @@ export default function ShopDetailPage() {
           </button>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Marketplace Sidebar */}
+          <MarketplaceSidebar
+            categories={['Mode', 'Cosmétiques']}
+            selectedCategory={selectedCategory || 'Mode'}
+            shops={shops}
+            selectedShop={shop}
+            onCategorySelect={(cat) => {
+              setSelectedCategory(cat);
+              fetchShopsByCategory(cat);
+            }}
+            onShopSelect={(s) => window.location.href = `/shops/${s.slug || s._id}`}
+            accentColor={accentColor}
+          />
           {/* Sidebar Filtres - Desktop */}
           <aside className="hidden lg:block w-80 flex-shrink-0">
             <div className="sticky top-32">
