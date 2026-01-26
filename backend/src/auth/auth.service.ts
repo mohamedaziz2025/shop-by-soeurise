@@ -184,6 +184,15 @@ export class AuthService {
       role: user.role,
     };
 
+    console.log('=== JWT DEBUG START ===');
+    console.log('All env vars:', process.env);
+    console.log('JWT specific env vars:', {
+      JWT_SECRET: process.env.JWT_SECRET,
+      JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
+      JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+      JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN
+    });
+
     const accessExpiresIn = parseInt(this.configService.get('JWT_EXPIRES_IN', '900'), 10);
     const refreshExpiresIn = parseInt(this.configService.get('JWT_REFRESH_EXPIRES_IN', '604800'), 10);
     
