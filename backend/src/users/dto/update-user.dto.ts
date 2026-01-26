@@ -26,7 +26,22 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   avatar?: string;
-}
+
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @IsString()
+  @IsOptional()
+  city?: string;
+
+  @IsString()
+  @IsOptional()
+  postalCode?: string;
+
+  @IsString()
+  @IsOptional()
+  country?: string;
 
 export class ChangePasswordDto {
   @IsString()
