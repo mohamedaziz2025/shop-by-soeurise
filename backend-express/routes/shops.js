@@ -230,15 +230,25 @@ router.get('/seller/stats', auth, async (req, res) => {
       return res.status(404).json({ message: 'Shop not found' });
     }
 
-    // Count active products
     const Product = require('../models/Product');
+    const Order = require('../models/Order');
+
+    // Count active products
     const activeProducts = await Product.countDocuments({
       shopId: shop._id,
       status: 'ACTIVE'
     });
 
-    // Get recent orders (placeholder - TODO: implement when OrderItem model is available)
-    const recentOrders = [];
+    // Calculate real-time stats from products and orders
+    const products = await Product.find({ shopId: shop._id });
+
+    // Calculate total sales and orders from products salesCount
+    let totalSales = 0;
+    let totalOrders = 0;
+    products.forEach(product => {
+      totalSales += (product.price * (product.salesCount || 0));
+      // Note: This is approximate, real order count would need OrderItem model
+    });
 
     // Get top products
     const topProducts = await Product.find({
@@ -247,28 +257,38 @@ router.get('/seller/stats', auth, async (req, res) => {
     })
     .sort({ salesCount: -1 })
     .limit(5)
-    .select('name salesCount price mainImage');
+    .select('name salesCount price mainImage _id');
 
-    // For now, use shop stored values (should be updated periodically)
-    // TODO: Implement real-time calculation from orders when OrderItem model is available
+    // Get recent orders (placeholder - will be empty until OrderItem model is implemented)
+    const recentOrders = [];
+
+    // Calculate average rating from products
+    const productsWithRating = products.filter(p => p.averageRating > 0);
+    const averageRating = productsWithRating.length > 0
+      ? productsWithRating.reduce((sum, p) => sum + p.averageRating, 0) / productsWithRating.length
+      : 0;
+
+    // Calculate total reviews
+    const totalReviews = products.reduce((sum, p) => sum + (p.reviewsCount || 0), 0);
+
     const stats = {
-      // Legacy fields
+      // Real-time calculated fields
       totalProducts: activeProducts,
-      totalSales: shop.totalSales || 0,
-      totalOrders: shop.totalOrders || 0,
-      averageRating: shop.averageRating || 0,
-      totalReviews: shop.totalReviews || 0,
+      totalSales: totalSales,
+      totalOrders: totalOrders,
+      averageRating: averageRating,
+      totalReviews: totalReviews,
 
       // Frontend expected fields
-      revenue: shop.totalSales || 0,
-      ordersCount: shop.totalOrders || 0,
-      pendingOrders: 0, // TODO: calculate from orders
+      revenue: totalSales,
+      ordersCount: totalOrders,
+      pendingOrders: 0, // TODO: calculate from actual orders
       activeProducts: activeProducts,
-      deliveredOrders: 0, // TODO: calculate from orders
-      inProgressOrders: 0, // TODO: calculate from orders
-      cancelledOrders: 0, // TODO: calculate from orders
-      totalCustomers: 0, // TODO: calculate from orders
-      returningCustomers: 0, // TODO: calculate from orders
+      deliveredOrders: 0, // TODO: calculate from actual orders
+      inProgressOrders: 0, // TODO: calculate from actual orders
+      cancelledOrders: 0, // TODO: calculate from actual orders
+      totalCustomers: 0, // TODO: calculate from actual orders
+      returningCustomers: 0, // TODO: calculate from actual orders
 
       // Arrays for dashboard
       recentOrders: recentOrders,

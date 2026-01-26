@@ -14,7 +14,7 @@ const rbac = (allowedRoles) => {
     if (allowedRoles.includes('SELLER') && req.user.role === 'CLIENT') {
       try {
         const Shop = require('../models/Shop');
-        const shop = await Shop.findOne({ seller: req.user._id });
+        const shop = await Shop.findOne({ sellerId: req.user._id });
         if (shop) {
           return next();
         }
