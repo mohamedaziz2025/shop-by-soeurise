@@ -4,10 +4,15 @@ const rbac = require('../middleware/rbac');
 
 const router = express.Router();
 
-// Get user's orders
-router.get('/my-orders', auth, async (req, res) => {
-  // TODO: Implement get user's orders
-  res.json({ message: 'Get my orders not implemented yet' });
+// Get seller's orders (Authenticated users with shop)
+router.get('/seller/orders', auth, async (req, res) => {
+  try {
+    // TODO: Implement when Order model has items field
+    // For now, return empty array to prevent errors
+    res.json([]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 // Get all orders
