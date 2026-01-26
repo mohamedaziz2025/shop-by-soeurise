@@ -82,6 +82,23 @@ export default function ProductDetailPage() {
     window.location.href = `/shops/${shop.slug}`;
   };
 
+  const handleAddToCart = async () => {
+    setAdding(true);
+    try {
+      await addItem({
+        productId: product._id,
+        variantId: selectedVariant?._id,
+        quantity,
+      });
+      alert('Produit ajouté au panier !');
+    } catch (error) {
+      console.error('Erreur ajout panier:', error);
+      alert('Erreur lors de l\'ajout au panier');
+    } finally {
+      setAdding(false);
+    }
+  };
+
   const accentColor = currentCategory === 'Mode' ? 'indigo' : 'rose';
 
   if (loading) {
