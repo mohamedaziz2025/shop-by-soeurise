@@ -23,6 +23,7 @@ import Image from 'next/image';
 interface Shop {
   _id?: string;
   id?: string;
+  slug?: string;
   name: string;
   description: string;
   owner: {
