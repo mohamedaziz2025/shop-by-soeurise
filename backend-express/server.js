@@ -21,12 +21,49 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongodb:27017/soeurise', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongodb:27017/soeurise2', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('MongoDB connected'))
+.then(async () => {
+  console.log('MongoDB connected');
+  await seedAdminIfNotExists();
+})
 .catch(err => console.error('MongoDB connection error:', err));
+
+// Seed admin user
+async function seedAdminIfNotExists() {
+  try {
+    console.log('Checking for admin user...');
+    const User = require('./models/User');
+
+    const existingAdmin = await User.findOne({ role: 'ADMIN' });
+    if (existingAdmin) {
+      console.log(`✓ Admin already exists: ${existingAdmin.email}`);
+      return;
+    }
+
+    console.log('Creating default admin user...');
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash('admin123', 12);
+
+    const adminUser = new User({
+      firstName: 'Admin',
+      lastName: 'Soeurise',
+      email: 'admin@soeurise.com',
+      password: hashedPassword,
+      role: 'ADMIN',
+      status: 'ACTIVE',
+      emailVerified: true,
+      phone: '+33123456789',
+    });
+
+    const savedAdmin = await adminUser.save();
+    console.log(`✓ Admin user created successfully: ${savedAdmin.email} (ID: ${savedAdmin._id})`);
+  } catch (error) {
+    console.error('✗ Error seeding admin:', error?.message || error);
+  }
+}
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));

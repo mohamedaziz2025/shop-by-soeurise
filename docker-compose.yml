@@ -33,7 +33,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/soeurise-express?authSource=admin
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/soeurise2?authSource=admin
       JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_change_in_production_64chars_minimum}
     depends_on:
       - mongodb
