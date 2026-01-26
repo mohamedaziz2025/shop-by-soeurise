@@ -57,6 +57,9 @@ export default function AdminShopsPage() {
     category: '',
     location: ''
   });
+  const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
+  const [showActionMenu, setShowActionMenu] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     fetchShops();
