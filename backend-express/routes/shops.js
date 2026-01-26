@@ -237,6 +237,18 @@ router.get('/seller/stats', auth, async (req, res) => {
       status: 'ACTIVE'
     });
 
+    // Get recent orders (placeholder - TODO: implement when OrderItem model is available)
+    const recentOrders = [];
+
+    // Get top products
+    const topProducts = await Product.find({
+      shopId: shop._id,
+      status: 'ACTIVE'
+    })
+    .sort({ salesCount: -1 })
+    .limit(5)
+    .select('name salesCount price mainImage');
+
     // For now, use shop stored values (should be updated periodically)
     // TODO: Implement real-time calculation from orders when OrderItem model is available
     const stats = {
@@ -252,6 +264,15 @@ router.get('/seller/stats', auth, async (req, res) => {
       ordersCount: shop.totalOrders || 0,
       pendingOrders: 0, // TODO: calculate from orders
       activeProducts: activeProducts,
+      deliveredOrders: 0, // TODO: calculate from orders
+      inProgressOrders: 0, // TODO: calculate from orders
+      cancelledOrders: 0, // TODO: calculate from orders
+      totalCustomers: 0, // TODO: calculate from orders
+      returningCustomers: 0, // TODO: calculate from orders
+
+      // Arrays for dashboard
+      recentOrders: recentOrders,
+      topProducts: topProducts,
     };
 
     res.json(stats);

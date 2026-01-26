@@ -343,12 +343,12 @@ export default function SellerDashboardPage() {
               </div>
               
               <div className="space-y-3">
-                {stats?.recentOrders?.length > 0 ? (
+                {stats?.recentOrders && Array.isArray(stats.recentOrders) && stats.recentOrders.length > 0 ? (
                   stats.recentOrders.map((order: any) => (
                     <div key={order._id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">#{order.orderNumber || order._id.slice(-6)}</span>
+                          <span className="font-medium">#{order.orderNumber || (order._id && typeof order._id === 'string' ? order._id.slice(-6) : 'N/A')}</span>
                           <StatusBadge 
                             status={order.status} 
                             type={
@@ -385,7 +385,7 @@ export default function SellerDashboardPage() {
               </div>
               
               <div className="space-y-3">
-                {stats?.topProducts?.length > 0 ? (
+                {stats?.topProducts && Array.isArray(stats.topProducts) && stats.topProducts.length > 0 ? (
                   stats.topProducts.map((product: any, idx: number) => (
                     <div key={product._id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50">
                       <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
