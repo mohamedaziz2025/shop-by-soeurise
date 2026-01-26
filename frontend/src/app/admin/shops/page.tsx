@@ -155,6 +155,19 @@ export default function AdminShopsPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!selectedShop) return;
+    try {
+      const shopId = selectedShop._id || selectedShop.id || '';
+      await api.deleteShopAdmin(shopId);
+      await fetchShops();
+      setShowDeleteConfirm(false);
+      setSelectedShop(null);
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+    }
+  };
+
   const handleActivate = async (shopId: string) => {
     try {
       await api.approveShopAdmin(shopId);
