@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://72.62.71.97:3001/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://soeurise-backend-express:3001/api';
 
 class ApiClient {
   private client: AxiosInstance;
