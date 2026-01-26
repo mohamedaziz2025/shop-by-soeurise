@@ -184,14 +184,17 @@ export class AuthService {
       role: user.role,
     };
 
+    const accessExpiresIn = parseInt(this.configService.get('JWT_EXPIRES_IN', '900'), 10);
+    const refreshExpiresIn = parseInt(this.configService.get('JWT_REFRESH_EXPIRES_IN', '604800'), 10);
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.configService.get('JWT_SECRET'),
-        expiresIn: Number(this.configService.get('JWT_EXPIRES_IN')) || 900,
+        expiresIn: isNaN(accessExpiresIn) ? 900 : accessExpiresIn,
       }),
       this.jwtService.signAsync(payload, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
-        expiresIn: Number(this.configService.get('JWT_REFRESH_EXPIRES_IN')) || 604800,
+        expiresIn: isNaN(refreshExpiresIn) ? 604800 : refreshExpiresIn,
       }),
     ]);
 

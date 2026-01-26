@@ -17,10 +17,11 @@ import { LocalStrategy } from './strategies/local.strategy';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const expiresIn = configService.get<string>('JWT_EXPIRES_IN', '900');
+        const expiresInNumber = parseInt(expiresIn, 10);
         return {
           secret: configService.get<string>('JWT_SECRET'),
           signOptions: {
-            expiresIn: Number(expiresIn),
+            expiresIn: isNaN(expiresInNumber) ? 900 : expiresInNumber,
           },
         };
       },
