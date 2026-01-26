@@ -287,7 +287,6 @@ export default function ProductDetailPage() {
               </div>
             </div>
           </div>
-          </div>
         </div>
 
         {/* Avis (à implémenter) */}
@@ -295,8 +294,8 @@ export default function ProductDetailPage() {
           <h2 className="text-2xl font-bold mb-4">Avis clients</h2>
           <p className="text-gray-500">Aucun avis pour le moment</p>
         </div>
-          </div>
-        </main>
+      </div>
+    </main>
       </div>
     </div>
   );
