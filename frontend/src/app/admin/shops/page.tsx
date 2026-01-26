@@ -47,6 +47,7 @@ export default function AdminShopsPage() {
   const [filteredShops, setFilteredShops] = useState<Shop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingShop, setEditingShop] = useState<Shop | null>(null);
