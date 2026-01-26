@@ -55,10 +55,6 @@ export default function UserDashboardPage() {
         setHasShop(false);
       }
     })();
-    if (user.role === 'ADMIN') {
-      router.push('/admin/dashboard');
-      return;
-    }
 
     fetchDashboardData();
   }, [user, router, isAuthenticated, isLoading]);
@@ -183,7 +179,7 @@ export default function UserDashboardPage() {
                 <p className="text-sm text-gray-600">Votre boutique : <span className="font-medium">{sellerShop.name}</span></p>
               </div>
               <div className="flex items-center gap-3">
-                <Link href={`/shop/${sellerShop.slug || sellerShop._id}`} className="text-pink-600 hover:underline">
+                <Link href={`/shops/${sellerShop.slug || sellerShop._id}`} className="text-pink-600 hover:underline">
                   Voir la boutique
                 </Link>
                 <Link href="/seller/dashboard" className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600">
