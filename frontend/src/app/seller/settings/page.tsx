@@ -350,7 +350,7 @@ export default function SellerSettingsPage() {
                   <div className="flex items-center gap-4">
                     {logoPreview && (
                       <div className="w-24 h-24 rounded-xl border-2 border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50">
-                        <img src={logoPreview.startsWith('http') ? logoPreview : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1','')}${logoPreview}`} alt="Logo" className="w-full h-full object-cover" />
+                        <img src={logoPreview.startsWith('http') ? logoPreview : logoPreview.startsWith('data:') ? logoPreview : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}${logoPreview}`} alt="Logo" className="w-full h-full object-cover" />
                       </div>
                     )}
                     <input
