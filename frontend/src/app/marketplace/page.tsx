@@ -9,7 +9,7 @@ import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ModernLayout from '@/components/ModernLayout';
 import MarketplaceSidebar from '@/components/MarketplaceSidebar';
-import { Search, ChevronRight, Home, Filter, X } from 'lucide-react';
+import { Search, ChevronRight, Home, Filter, X, Menu } from 'lucide-react';
 
 function MarketplacePageContent() {
   const searchParams = useSearchParams();
@@ -121,8 +121,90 @@ function MarketplacePageContent() {
   return (
     <ModernLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-blue-50/30">
+        {/* Mobile/Tablet Sidebar - Overlay */}
+        <AnimatePresence>
+          {showMobileCategories && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowMobileCategories(false)}
+                className="fixed inset-0 bg-black/40 z-30"
+              />
+              <motion.div
+                initial={{ x: -300 }}
+                animate={{ x: 0 }}
+                exit={{ x: -300 }}
+                className="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl overflow-y-auto"
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-lg font-black text-gray-900">Univers & Boutiques</h2>
+                    <button
+                      onClick={() => setShowMobileCategories(false)}
+                      className="p-2 hover:bg-gray-100 rounded-lg"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <nav className="space-y-3">
+                    {categories.map((cat) => (
+                      <div key={cat}>
+                        <button
+                          onClick={() => {
+                            setCategory(cat);
+                            setSelectedShop(null);
+                            setView('shops');
+                            setShowMobileCategories(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 rounded-xl font-black text-lg transition-all ${
+                            category === cat
+                              ? accentColor === 'indigo'
+                                ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600'
+                                : 'bg-rose-50 text-rose-700 border-l-4 border-rose-600'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+
+                        {/* Shops sub-menu */}
+                        {category === cat && shops.length > 0 && (
+                          <div className="ml-6 mt-2 space-y-1.5">
+                            {shops.map((shop) => (
+                              <button
+                                key={shop._id}
+                                onClick={() => {
+                                  handleShopClick(shop);
+                                  setShowMobileCategories(false);
+                                }}
+                                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                                  selectedShop?._id === shop._id
+                                    ? 'bg-pink-50 text-pink-700 border-l-2 border-pink-600'
+                                    : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <ChevronRight className="w-3 h-3" />
+                                  {shop.name}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </nav>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Desktop Sidebar + Main Content */}
         <div className="flex flex-col lg:flex-row gap-0">
-          {/* Sidebar with categories and shops - Hidden on mobile, shown on lg */}
+          {/* Sidebar - Desktop only */}
           <div className="hidden lg:block lg:w-64 lg:flex-shrink-0">
             <MarketplaceSidebar
               categories={categories}
@@ -139,20 +221,27 @@ function MarketplacePageContent() {
             />
           </div>
 
-          {/* Main Content - Full width on mobile */}
+          {/* Main Content - Full width on mobile/tablet, flex-1 on desktop */}
           <main className="flex-1 w-full">
             {/* Header Sticky: Breadcrumb + Search */}
             <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
               <div className="px-4 sm:px-6 lg:px-8 py-4">
                 {/* Mobile categories button */}
-                <div className="lg:hidden mb-3">
+                <div className="lg:hidden mb-4 flex items-center justify-between">
                   <button
                     onClick={() => setShowMobileCategories(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg font-medium shadow-sm hover:bg-indigo-600 transition"
+                    className={`inline-flex items-center gap-2 px-4 py-3 ${
+                      accentColor === 'indigo'
+                        ? 'bg-indigo-600 hover:bg-indigo-700'
+                        : 'bg-rose-600 hover:bg-rose-700'
+                    } text-white rounded-full font-semibold shadow-lg transition-all transform hover:scale-105`}
                   >
-                    <Home className="w-4 h-4" />
-                    <span className="text-sm">Univers & Boutiques</span>
+                    <Menu className="w-5 h-5" />
+                    <span className="text-sm">Catégories</span>
                   </button>
+                  <span className="text-xs font-semibold text-gray-600 bg-white px-3 py-1.5 rounded-full border border-gray-200">
+                    {category}
+                  </span>
                 </div>
                 {/* Breadcrumb */}
                 <div className="hidden lg:flex items-center gap-2 text-sm font-medium text-gray-600 mb-3">
