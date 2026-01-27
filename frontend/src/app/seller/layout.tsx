@@ -124,11 +124,11 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
             </button>
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-900">{user?.name || 'Vendeur'}</p>
+                <p className="text-sm font-medium text-gray-900">{user?.firstName || 'Vendeur'}</p>
                 <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white font-semibold">
-                {user?.name?.charAt(0) || 'V'}
+                {user?.firstName?.charAt(0) || 'V'}
               </div>
             </div>
           </div>
