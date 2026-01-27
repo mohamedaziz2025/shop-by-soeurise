@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Put, Delete, Patch, Query, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Patch, Query, Body, Param, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -150,9 +153,26 @@ export class AdminController {
     return this.adminService.activateShop(shopId);
   }
 
-  // Admin product creation - allows creating product for any shop
+  // Admin product creation - allows creating product for any shop (supports file uploads)
+  @UseInterceptors(
+    FilesInterceptor('images', 8, {
+      storage: diskStorage({
+        destination: './uploads/products',
+        filename: (req, file, cb) => {
+          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `${unique}${ext}`);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
   @Post('products')
-  async createProduct(@Body() productData: any) {
+  async createProduct(@Body() productData: any, @UploadedFiles() images?: Express.Multer.File[]) {
+    if (images && images.length > 0) {
+      productData.images = images.map((f) => `/uploads/products/${f.filename}`);
+    }
+
     return this.adminService.createProductForShop(productData);
   }
 }
