@@ -107,6 +107,21 @@ export default function CreateProductPage() {
       if (!formData.shopId) {
         throw new Error('Veuillez sélectionner une boutique');
       }
+      if (!formData.name.trim()) {
+        throw new Error('Le nom du produit est requis');
+      }
+      if (!formData.description.trim()) {
+        throw new Error('La description du produit est requise');
+      }
+      if (!formData.price || parseFloat(formData.price) <= 0) {
+        throw new Error('Le prix doit être supérieur à 0');
+      }
+      if (!formData.category) {
+        throw new Error('Veuillez sélectionner une catégorie');
+      }
+      if (formData.images.length === 0) {
+        throw new Error('Au moins une image est requise');
+      }
 
       await api.createProductAdmin(formData);
       router.push('/admin/products?success=Product created successfully');

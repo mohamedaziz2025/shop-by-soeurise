@@ -109,10 +109,18 @@ export default function NewProductPage() {
 
     try {
       // Validation
-      if (!formData.name || !formData.description || !formData.category) {
-        throw new Error('Veuillez remplir tous les champs obligatoires');
+      if (!formData.name.trim()) {
+        throw new Error('Le nom du produit est requis');
       }
-
+      if (!formData.description.trim()) {
+        throw new Error('La description du produit est requise');
+      }
+      if (!formData.category) {
+        throw new Error('Veuillez sélectionner une catégorie');
+      }
+      if (!formData.price || parseFloat(formData.price) <= 0) {
+        throw new Error('Le prix doit être supérieur à 0');
+      }
       if (images.length === 0) {
         throw new Error('Ajoutez au moins une image');
       }

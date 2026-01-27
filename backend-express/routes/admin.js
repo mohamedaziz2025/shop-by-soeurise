@@ -723,7 +723,6 @@ const productUpload = multer({
 router.post('/products', auth, rbac(['ADMIN']), productUpload.array('images', 8), async (req, res) => {
   try {
     const {
-      sellerId,
       shopId,
       name,
       description,
@@ -736,26 +735,24 @@ router.post('/products', auth, rbac(['ADMIN']), productUpload.array('images', 8)
     } = req.body;
 
     // Validate required fields
-    if (!sellerId || !shopId || !name || !description || !price || !category) {
+    if (!shopId || !name || !description || !price || !category) {
       return res.status(400).json({
-        message: 'sellerId, shopId, name, description, price, and category are required'
+        message: 'shopId, name, description, price, and category are required'
       });
     }
 
-    // Check if user exists
-    const user = await User.findById(sellerId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Check if shop exists and belongs to the user
+    // Check if shop exists and get sellerId
     const shop = await Shop.findById(shopId);
     if (!shop) {
       return res.status(404).json({ message: 'Shop not found' });
     }
 
-    if (shop.sellerId.toString() !== sellerId) {
-      return res.status(400).json({ message: 'Shop does not belong to the specified user' });
+    const sellerId = shop.sellerId;
+
+    // Check if user exists
+    const user = await User.findById(sellerId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
     const productData = {
@@ -781,7 +778,7 @@ router.post('/products', auth, rbac(['ADMIN']), productUpload.array('images', 8)
     // Handle uploaded images
     if (req.files && req.files.length > 0) {
       productData.images = req.files.map(file => `/uploads/products/${file.filename}`);
-      productData.image = `/uploads/products/${req.files[0].filename}`;
+      productData.mainImage = `/uploads/products/${req.files[0].filename}`;
     }
 
     const product = new Product(productData);

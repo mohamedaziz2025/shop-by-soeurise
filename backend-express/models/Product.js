@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   slug: { type: String, required: true, unique: true, lowercase: true },
   description: { type: String, required: true },
-  shortDescription: { type: String, required: true },
+  shortDescription: { type: String },
   status: { type: String, enum: productStatusEnum, default: 'DRAFT' },
   price: { type: Number, required: true, min: 0 },
   compareAtPrice: { type: Number, min: 0 },
