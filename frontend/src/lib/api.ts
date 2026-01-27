@@ -165,6 +165,11 @@ class ApiClient {
     return data;
   }
 
+  async getAllProducts(filters?: any) {
+    const { data } = await this.client.get('/admin/products', { params: filters });
+    return data.products || data;
+  }
+
   async getProductBySlug(slug: string) {
     const { data } = await this.client.get(`/products/slug/${slug}`);
     return data;
@@ -649,6 +654,12 @@ class ApiClient {
 
   async deleteOrderAdmin(orderId: string) {
     const { data } = await this.client.delete(`/admin/orders/${orderId}`);
+    return data;
+  }
+
+  // Admin - Dashboard
+  async getDashboardStats() {
+    const { data } = await this.client.get('/admin/dashboard/stats');
     return data;
   }
 

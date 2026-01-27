@@ -153,6 +153,8 @@ router.post('/', auth, rbac(['SELLER']), upload.array('images', 8), [
       sellerId: req.user._id,
       shopId: shop._id,
       slug: req.body.slug || req.body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      status: 'ACTIVE', // Products created by sellers are automatically active
+      isApproved: true, // Products created by sellers are automatically approved
     };
 
     // Handle uploaded images
