@@ -162,7 +162,7 @@ class ApiClient {
     }
 
     const { data } = await this.client.get('/products', { params });
-    return data;
+    return data.products || data;
   }
 
   async getAllProducts(filters?: any) {

@@ -154,7 +154,7 @@ export default function MarketplaceSidebar({
         `}
         role="navigation"
         aria-label="Filtres et catégories"
-        aria-hidden={!mobileOpen && 'true'}
+        inert={!mobileOpen ? true : undefined}
       >
         {sidebarContent}
       </aside>
