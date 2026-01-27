@@ -176,6 +176,33 @@ class ApiClient {
   }
 
   async createProductAdmin(productData: any) {
+    // If images are present (File[]), send multipart/form-data
+    if (productData?.images && Array.isArray(productData.images) && productData.images.length > 0) {
+      const form = new FormData();
+      // Append simple fields
+      Object.keys(productData).forEach((k) => {
+        if (k === 'images' || k === 'variants') return;
+        const v = (productData as any)[k];
+        if (v === undefined || v === null) return;
+        form.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+      });
+
+      // Append variants as JSON
+      if (productData.variants) {
+        form.append('variants', JSON.stringify(productData.variants));
+      }
+
+      // Append multiple images
+      productData.images.forEach((file: File, idx: number) => {
+        form.append('images', file, file.name || `image-${idx}.jpg`);
+      });
+
+      const { data } = await this.client.post('/admin/products', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return data;
+    }
+
     const { data } = await this.client.post('/admin/products', productData);
     return data;
   }
