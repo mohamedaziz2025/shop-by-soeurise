@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import { api } from '@/lib/api';
@@ -11,6 +11,7 @@ export default function CreateShopPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -25,6 +26,20 @@ export default function CreateShopPage() {
     sellerId: '',
     logo: null as File | null,
   });
+
+  // Fetch users on component mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const data = await api.getAllUsers();
+      setUsers(data);
+    } catch (err) {
+      console.error('Erreur chargement utilisateurs:', err);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -95,6 +110,23 @@ export default function CreateShopPage() {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations générales</h3>
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Attribuer à un utilisateur *</label>
+                  <select
+                    name="sellerId"
+                    value={formData.sellerId}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Sélectionner un utilisateur...</option>
+                    {users.map((user) => (
+                      <option key={user._id || user.id} value={user._id || user.id}>
+                        {user.firstName} {user.lastName} ({user.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
                   <input

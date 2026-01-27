@@ -157,7 +157,13 @@ export class AdminController {
   @UseInterceptors(
     FileInterceptor('logo', {
       storage: diskStorage({
-        destination: './uploads/logos',
+        destination: (req, file, cb) => {
+          const dir = join(process.cwd(), 'uploads', 'logos');
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          cb(null, dir);
+        },
         filename: (req, file, cb) => {
           const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
@@ -174,6 +180,9 @@ export class AdminController {
     }
 
     const sellerId = shopData.sellerId || shopData.ownerId;
+    if (!sellerId) {
+      throw new Error('sellerId ou ownerId requis');
+    }
     return this.adminService.createShopForUser(sellerId, shopData);
   }
 
@@ -181,7 +190,13 @@ export class AdminController {
   @UseInterceptors(
     FilesInterceptor('images', 8, {
       storage: diskStorage({
-        destination: './uploads/products',
+        destination: (req, file, cb) => {
+          const dir = join(process.cwd(), 'uploads', 'products');
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          cb(null, dir);
+        },
         filename: (req, file, cb) => {
           const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
@@ -195,6 +210,12 @@ export class AdminController {
   async createProduct(@Body() productData: any, @UploadedFiles() images?: Express.Multer.File[]) {
     if (images && images.length > 0) {
       productData.images = images.map((f) => `/uploads/products/${f.filename}`);
+      if (images.length > 0) {
+        productData.image = `/uploads/products/${images[0].filename}`;
+      }
+    }
+    if (!productData.shopId) {
+      throw new Error('shopId requis');
     }
 
     return this.adminService.createProductForShop(productData);

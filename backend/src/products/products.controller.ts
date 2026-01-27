@@ -8,6 +8,8 @@ import {
   Param,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import {
@@ -21,6 +23,10 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '../schemas/user.schema';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import * as fs from 'fs';
 
 @Controller('products')
 export class ProductsController {
@@ -58,10 +64,36 @@ export class ProductsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SELLER)
+  @UseInterceptors(
+    FilesInterceptor('images', 8, {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const dir = join(process.cwd(), 'uploads', 'products');
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          cb(null, dir);
+        },
+        filename: (req, file, cb) => {
+          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `${unique}${ext}`);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 },
+    })
+  )
   async create(
     @CurrentUser() user: any,
     @Body() createProductDto: CreateProductDto,
+    @UploadedFiles() images?: Express.Multer.File[],
   ) {
+    if (images && images.length > 0) {
+      createProductDto.images = images.map((f) => `/uploads/products/${f.filename}`);
+      if (images.length > 0) {
+        createProductDto.image = `/uploads/products/${images[0].filename}`;
+      }
+    }
     return this.productsService.create(user.userId, createProductDto);
   }
 

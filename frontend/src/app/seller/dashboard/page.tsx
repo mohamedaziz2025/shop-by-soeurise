@@ -9,7 +9,7 @@ import { StatCard, SimpleBarChart, DataTable, StatusBadge, MetricCard } from '@/
 import { 
   BarChart3, Package, ShoppingBag, TrendingUp, Euro, Users, 
   Star, Eye, Settings, LogOut, Bell, Search, Download, 
-  ArrowUpRight, Clock, CheckCircle, XCircle, AlertTriangle
+  ArrowUpRight, Clock, CheckCircle, XCircle, AlertTriangle, Menu, X
 } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/utils';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ export default function SellerDashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('30d');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (isLoading) return; // Wait for auth initialization
@@ -150,11 +151,31 @@ export default function SellerDashboardPage() {
       </header>
 
       <div className="flex">
+        {/* Mobile sidebar toggle */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="lg:hidden fixed bottom-6 right-6 z-40 p-3 bg-gradient-to-r from-pink-600 to-rose-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-110"
+          title="Ouvrir le menu"
+        >
+          {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+
+        {/* Mobile overlay */}
+        {sidebarOpen && (
+          <div
+            className="lg:hidden fixed inset-0 z-30 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         {/* Sidebar */}
-        <aside className="hidden lg:block w-64 bg-white border-r border-gray-200/50 min-h-screen sticky top-16 shadow-sm">
+        <aside className={`fixed lg:static lg:block inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200/50 min-h-screen sticky top-16 shadow-lg lg:shadow-sm transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
           <nav className="p-4 space-y-1">
             <Link
               href="/seller/dashboard"
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-pink-50 to-pink-0 text-pink-600 rounded-xl font-semibold transition-all group"
             >
               <div className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-pink-600 to-rose-500 text-white rounded-lg group-hover:shadow-lg transition-all">
@@ -164,6 +185,7 @@ export default function SellerDashboardPage() {
             </Link>
             <Link
               href="/seller/products"
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-gray-700 transition-all group"
             >
               <div className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg group-hover:bg-gray-200 transition-all">
@@ -173,6 +195,7 @@ export default function SellerDashboardPage() {
             </Link>
             <Link
               href="/seller/orders"
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-gray-700 transition-all group"
             >
               <div className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg group-hover:bg-gray-200 transition-all">
@@ -182,6 +205,7 @@ export default function SellerDashboardPage() {
             </Link>
             <Link
               href="/seller/customers"
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-gray-700 transition-all group"
             >
               <div className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg group-hover:bg-gray-200 transition-all">
@@ -191,6 +215,7 @@ export default function SellerDashboardPage() {
             </Link>
             <Link
               href="/seller/analytics"
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-gray-700 transition-all group"
             >
               <div className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg group-hover:bg-gray-200 transition-all">
@@ -202,6 +227,7 @@ export default function SellerDashboardPage() {
             <div className="pt-4 mt-4 border-t border-gray-200/50">
               <Link
                 href="/seller/settings"
+                onClick={() => setSidebarOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-gray-700 transition-all group"
               >
                 <div className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg group-hover:bg-gray-200 transition-all">

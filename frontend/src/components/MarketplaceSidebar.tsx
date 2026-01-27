@@ -107,36 +107,55 @@ export default function MarketplaceSidebar({
 
   return (
     <>
-      {/* Mobile toggle button */}
+      {/* Mobile toggle button - Enhanced */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed bottom-16 sm:bottom-20 md:bottom-6 right-3 sm:right-4 md:right-6 z-50 bg-gradient-to-r from-pink-600 to-rose-500 text-white p-2 sm:p-2.5 md:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110"
-        aria-label="Ouvrir les filtres"
+        className="lg:hidden fixed bottom-6 right-4 z-50 bg-gradient-to-r from-pink-600 to-rose-500 text-white p-3 rounded-full shadow-2xl hover:shadow-3xl hover:scale-125 transition-all duration-300 ease-out active:scale-95 flex items-center justify-center group"
+        aria-label={mobileOpen ? 'Fermer les filtres' : 'Ouvrir les filtres'}
+        title={mobileOpen ? 'Fermer les filtres' : 'Ouvrir les filtres'}
       >
-        {mobileOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-600 to-rose-500 animate-pulse opacity-20 group-hover:opacity-30 transition-opacity" />
+        {mobileOpen ? (
+          <X className="w-6 h-6 relative z-10 transition-transform duration-200" />
+        ) : (
+          <Menu className="w-6 h-6 relative z-10 transition-transform duration-200 group-hover:scale-110" />
+        )}
       </button>
 
-      {/* Mobile overlay */}
+      {/* Mobile overlay - Enhanced */}
       {mobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity duration-200"
+          className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-60 transition-opacity duration-300 backdrop-blur-sm"
           onClick={() => setMobileOpen(false)}
+          role="presentation"
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Enhanced */}
       <aside
         className={`
-          fixed lg:static lg:block inset-y-0 left-0 z-50 w-48 sm:w-56 md:w-64 bg-white border-r border-gray-200 min-h-screen sticky top-0
-          transform transition-transform duration-300 ease-in-out
-          lg:translate-x-0
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          shadow-lg lg:shadow-none
-          overflow-y-auto
+          fixed lg:static lg:block inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 min-h-screen
+          transform transition-all duration-300 ease-in-out
+          lg:translate-x-0 lg:shadow-md
+          ${mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
+          overflow-y-auto overflow-x-hidden
+          scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100
         `}
+        role="navigation"
+        aria-label="Filtres et catégories"
+        aria-hidden={!mobileOpen && 'true'}
       >
         {sidebarContent}
       </aside>
+
+      {/* Mobile hint on first load */}
+      {!mobileOpen && (
+        <div className="lg:hidden fixed bottom-24 right-4 pointer-events-none">
+          <div className="animate-bounce bg-white rounded-lg shadow-lg px-3 py-1.5 text-xs font-semibold text-pink-600 whitespace-nowrap">
+            Ouvrir les filtres
+          </div>
+        </div>
+      )}
     </>
   );
 }

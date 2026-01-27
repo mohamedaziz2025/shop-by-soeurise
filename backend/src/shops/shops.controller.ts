@@ -72,7 +72,13 @@ export class ShopsController {
   @UseInterceptors(
     FileInterceptor('logo', {
       storage: diskStorage({
-        destination: './uploads/logos',
+        destination: (req, file, cb) => {
+          const dir = join(process.cwd(), 'uploads', 'logos');
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          cb(null, dir);
+        },
         filename: (req, file, cb) => {
           const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
           const name = file.originalname.split('.')[0];
