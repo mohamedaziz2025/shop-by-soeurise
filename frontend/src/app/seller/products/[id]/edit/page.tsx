@@ -57,7 +57,7 @@ export default function EditProductPage() {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const data = await api.getProduct(productId);
+      const data = await api.getProductById(productId);
       if (data) {
         setForm({
           name: data.name || '',
