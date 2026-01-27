@@ -360,7 +360,7 @@ export default function HomePage() {
               <ul className="space-y-2 text-sm text-gray-300">
                 <li><Link href="/marketplace" className="hover:text-pink-400 transition">Tous les produits</Link></li>
                 <li><Link href="/categories" className="hover:text-pink-400 transition">Catégories</Link></li>
-                <li><Link href="/shops" className="hover:text-pink-400 transition">Boutiques</Link></li>
+                <li><Link href="/marketplace" className="hover:text-pink-400 transition">Boutiques</Link></li>
               </ul>
             </div>
 

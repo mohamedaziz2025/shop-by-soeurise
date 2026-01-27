@@ -25,7 +25,7 @@ export default function Footer() {
               <li><Link href="/marketplace" className="hover:text-pink-400 transition">Tous les produits</Link></li>
               <li><Link href="/marketplace?category=fashion" className="hover:text-pink-400 transition">Prêt-à-porter</Link></li>
               <li><Link href="/marketplace?category=accessories" className="hover:text-pink-400 transition">Accessoires</Link></li>
-              <li><Link href="/shops" className="hover:text-pink-400 transition">Boutiques</Link></li>
+              <li><Link href="/marketplace" className="hover:text-pink-400 transition">Boutiques</Link></li>
             </ul>
           </div>
 
@@ -42,7 +42,7 @@ export default function Footer() {
             <h4 className="font-bold mb-4 text-pink-400">Aide</h4>
             <ul className="space-y-2 text-sm text-gray-300">
               <li><Link href="/account" className="hover:text-pink-400 transition">Mon compte</Link></li>
-              <li><Link href="/orders" className="hover:text-pink-400 transition">Mes commandes</Link></li>
+              <li><Link href="/account/orders" className="hover:text-pink-400 transition">Mes commandes</Link></li>
               <li><Link href="/contact" className="hover:text-pink-400 transition">Support</Link></li>
             </ul>
           </div>
