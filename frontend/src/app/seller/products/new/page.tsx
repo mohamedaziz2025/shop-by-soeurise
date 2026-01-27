@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { api } from '@/lib/api';
-import SellerLayout from '@/components/SellerLayout';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Plus, X, Upload, AlertCircle, Store, Info } from 'lucide-react';
 import Image from 'next/image';
@@ -146,8 +145,7 @@ export default function NewProductPage() {
   };
 
   return (
-    <SellerLayout activeTab="products" title="Nouveau produit">
-      <div className="max-w-4xl">
+    <div className="max-w-4xl">
         {/* Shop Info Alert */}
         {loadingShop ? (
           <LoadingSpinner size="sm" />
@@ -422,6 +420,5 @@ export default function NewProductPage() {
           </div>
         </form>
       </div>
-    </SellerLayout>
   );
 }

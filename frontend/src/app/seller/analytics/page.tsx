@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import SellerLayout from '@/components/SellerLayout';
 import { Download, TrendingUp } from 'lucide-react';
 
 export default function SellerAnalyticsPage() {
@@ -35,7 +34,7 @@ export default function SellerAnalyticsPage() {
   }
 
   return (
-    <SellerLayout activeTab="analytics" title="Analytics & Rapports" subtitle="Analysez vos performances de vente">
+    <>
       {/* Header with Export Button */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -103,6 +102,6 @@ export default function SellerAnalyticsPage() {
           </div>
         </div>
       </div>
-    </SellerLayout>
+    </>
   );
 }

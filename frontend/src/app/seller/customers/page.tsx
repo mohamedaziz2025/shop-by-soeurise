@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import SellerLayout from '@/components/SellerLayout';
 
 export default function SellerCustomersPage() {
   const { user } = useAuthStore();
@@ -45,7 +44,7 @@ export default function SellerCustomersPage() {
   }
 
   return (
-    <SellerLayout activeTab="customers" onSearch={handleSearch}>
+    <>
       {/* Customers Table */}
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200/50">
         {filteredCustomers.length > 0 ? (
@@ -94,6 +93,6 @@ export default function SellerCustomersPage() {
           </div>
         )}
       </div>
-    </SellerLayout>
+    </>
   );
 }

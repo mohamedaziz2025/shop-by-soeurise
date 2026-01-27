@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import SellerLayout from '@/components/SellerLayout';
 import { AlertTriangle } from 'lucide-react';
 
 export default function SellerInventoryPage() {
@@ -45,7 +44,7 @@ export default function SellerInventoryPage() {
   }
 
   return (
-    <SellerLayout activeTab="inventory" onSearch={handleSearch} title="Gestion du stock" subtitle="Suivez et gérez votre inventaire">
+    <>
       {lowStockProducts.length > 0 && (
         <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
@@ -124,6 +123,6 @@ export default function SellerInventoryPage() {
           </table>
         </div>
       </div>
-    </SellerLayout>
+    </>
   );
 }
