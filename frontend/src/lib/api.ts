@@ -144,6 +144,11 @@ class ApiClient {
     return data;
   }
 
+  async createProductAdmin(productData: any) {
+    const { data } = await this.client.post('/admin/products', productData);
+    return data;
+  }
+
   async getMyProducts() {
     const { data } = await this.client.get('/products/seller/my-products');
     return data;
@@ -327,6 +332,11 @@ class ApiClient {
       return (data as any).shops;
     }
     return data;
+  }
+
+  async getAllShopsAdmin() {
+    // Same as getAllShops, used by admin product creation
+    return this.getAllShops();
   }
 
   async getSellerOrders() {

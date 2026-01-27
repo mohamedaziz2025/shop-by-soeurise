@@ -317,6 +317,34 @@ export class AdminService {
   }
 
   async getAllShops() {
-    return this.shopModel.find().sort({ createdAt: -1 });
+    return this.shopModel
+      .find()
+      .populate('sellerId', 'firstName lastName email')
+      .sort({ createdAt: -1 });
+  }
+
+  async createProductForShop(productData: any) {
+    // Vérifier que la boutique existe
+    const shop = await this.shopModel.findById(productData.shopId);
+    if (!shop) {
+      throw new Error('Boutique non trouvée');
+    }
+
+    // Créer le produit
+    const product = new this.productModel({
+      ...productData,
+      shopId: shop._id,
+      isApproved: true, // Les produits créés par l'admin sont approuvés d'office
+      createdBy: 'ADMIN',
+    });
+
+    await product.save();
+
+    // Mettre à jour le compteur de produits de la boutique
+    await this.shopModel.findByIdAndUpdate(shop._id, {
+      $inc: { totalProducts: 1 },
+    });
+
+    return product;
   }
 }

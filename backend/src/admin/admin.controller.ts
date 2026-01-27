@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -88,5 +88,11 @@ export class AdminController {
   @Get('shops')
   async getAllShops() {
     return this.adminService.getAllShops();
+  }
+
+  // Admin product creation - allows creating product for any shop
+  @Post('products')
+  async createProduct(@Body() productData: any) {
+    return this.adminService.createProductForShop(productData);
   }
 }

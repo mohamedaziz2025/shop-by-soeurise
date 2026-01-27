@@ -1,16 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import { api } from '@/lib/api';
-import { Package, AlertCircle, ArrowLeft, Upload, X } from 'lucide-react';
+import { Package, AlertCircle, ArrowLeft, Upload, X, Store } from 'lucide-react';
 
 export default function CreateProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [shops, setShops] = useState<any[]>([]);
+  const [loadingShops, setLoadingShops] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -23,6 +25,22 @@ export default function CreateProductPage() {
     variants: [] as { name: string; options: string[] }[],
     images: [] as File[],
   });
+
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        const allShops = await api.getAllShopsAdmin();
+        setShops(allShops);
+      } catch (err) {
+        console.error('Erreur chargement boutiques:', err);
+        setError('Impossible de charger les boutiques');
+      } finally {
+        setLoadingShops(false);
+      }
+    };
+
+    fetchShops();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -85,10 +103,15 @@ export default function CreateProductPage() {
     setLoading(true);
 
     try {
-      await api.createProduct(formData);
+      // Validation
+      if (!formData.shopId) {
+        throw new Error('Veuillez sélectionner une boutique');
+      }
+
+      await api.createProductAdmin(formData);
       router.push('/admin/products?success=Product created successfully');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur lors de la création du produit');
+      setError(err.response?.data?.message || err.message || 'Erreur lors de la création du produit');
     } finally {
       setLoading(false);
     }
@@ -124,6 +147,40 @@ export default function CreateProductPage() {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations générales</h3>
               <div className="space-y-4">
+                {/* Shop Selection - IMPORTANT */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Store className="w-4 h-4 text-blue-600" />
+                    Boutique cible *
+                  </label>
+                  {loadingShops ? (
+                    <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
+                      Chargement des boutiques...
+                    </div>
+                  ) : (
+                    <>
+                      <select
+                        value={formData.shopId}
+                        onChange={(e) => setFormData({ ...formData, shopId: e.target.value })}
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Sélectionner une boutique</option>
+                        {shops.map((shop) => (
+                          <option key={shop._id} value={shop._id}>
+                            {shop.name} ({shop.seller?.firstName} {shop.seller?.lastName})
+                          </option>
+                        ))}
+                      </select>
+                      {formData.shopId && shops.find(s => s._id === formData.shopId) && (
+                        <p className="text-xs text-blue-600 mt-2">
+                          ✓ Produit sera créé pour: <strong>{shops.find(s => s._id === formData.shopId)?.name}</strong>
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Nom du produit *</label>
                   <input
