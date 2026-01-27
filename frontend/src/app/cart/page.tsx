@@ -168,11 +168,19 @@ export default function CartPage() {
                       <div className="flex gap-6">
                         {/* Image */}
                         <div className="relative w-28 h-28 bg-gray-100 rounded-[2.5rem] overflow-hidden flex-shrink-0 border-2 border-gray-100">
-                          <Image
-                            src={item.product.mainImage || '/placeholder-product.png'}
+                          <img
+                            src={
+                              item.product.mainImage
+                                ? item.product.mainImage.startsWith('http')
+                                  ? item.product.mainImage
+                                  : `${API_BASE}${item.product.mainImage}`
+                                : '/placeholder-product.png'
+                            }
                             alt={item.product.name}
-                            fill
-                            className="object-cover"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/placeholder-product.png';
+                            }}
                           />
                         </div>
 

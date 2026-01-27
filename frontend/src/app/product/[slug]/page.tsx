@@ -101,6 +101,12 @@ export default function ProductDetailPage() {
 
   const accentColor = currentCategory === 'Mode' ? 'indigo' : 'rose';
 
+  const getImageUrl = (img: string | undefined) => {
+    if (!img) return '/placeholder-product.png';
+    if (img.startsWith('http')) return img;
+    return `http://72.62.71.97:3001${img}`;
+  };
+
   if (loading) {
     return <LoadingSpinner size="lg" />;
   }
@@ -144,11 +150,13 @@ export default function ProductDetailPage() {
             <div>
               {/* Image principale */}
               <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
-                <Image
-                  src={product?.images?.[selectedImage] || '/placeholder-product.png'}
+                <img
+                  src={getImageUrl(product?.images?.[selectedImage])}
                   alt={product?.name || 'Produit'}
-                  fill
-                  className="object-cover"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder-product.png';
+                  }}
                 />
               </div>
 
@@ -159,11 +167,18 @@ export default function ProductDetailPage() {
                     <button
                       key={idx}
                       onClick={() => setSelectedImage(idx)}
-                      className={`relative aspect-square bg-gray-100 rounded-lg overflow-hidden ${
+                      className={`relative aspect-square bg-gray-100 rounded-lg overflow-hidden overflow-hidden ${
                         selectedImage === idx ? 'ring-2 ring-pink-600' : ''
                       }`}
                     >
-                      <Image src={img} alt={`${product?.name || 'Produit'} ${idx + 1}`} fill className="object-cover" />
+                      <img
+                        src={getImageUrl(img)}
+                        alt={`${product?.name || 'Produit'} ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/placeholder-product.png';
+                        }}
+                      />
                     </button>
                   ))}
                 </div>
