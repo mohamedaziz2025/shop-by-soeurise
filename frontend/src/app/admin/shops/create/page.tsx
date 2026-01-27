@@ -71,7 +71,7 @@ export default function CreateShopPage() {
     setLoading(true);
 
     try {
-      await api.createShop(formData);
+      await api.createShopAdmin(formData);
       router.push('/admin/shops?success=Shop created successfully');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erreur lors de la création de la boutique');

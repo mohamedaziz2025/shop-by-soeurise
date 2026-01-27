@@ -527,6 +527,38 @@ class ApiClient {
   }
 
   // Admin - Shops CRUD  
+  async createShopAdmin(shopData: any) {
+    // Si shopData contient un logo (File), utiliser FormData
+    if (shopData.logo instanceof File) {
+      const formData = new FormData();
+      
+      // Ajouter tous les champs sauf le logo
+      Object.keys(shopData).forEach(key => {
+        if (key !== 'logo') {
+          if (typeof shopData[key] === 'object' && shopData[key] !== null) {
+            formData.append(key, JSON.stringify(shopData[key]));
+          } else {
+            formData.append(key, shopData[key]);
+          }
+        }
+      });
+      
+      // Ajouter le logo
+      formData.append('logo', shopData.logo);
+      
+      const { data } = await this.client.post('/admin/shops', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return data;
+    } else {
+      // Sinon, utiliser JSON normal
+      const { data } = await this.client.post('/admin/shops', shopData);
+      return data;
+    }
+  }
+
   async getShopByIdAdmin(shopId: string) {
     const { data } = await this.client.get(`/admin/shops/${shopId}`);
     return data;

@@ -1,10 +1,41 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const Product = require('../models/Product');
 const auth = require('../middleware/auth');
 const rbac = require('../middleware/rbac');
 
 const router = express.Router();
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, '../uploads/products');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, `${unique}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 // Get all products (public)
 router.get('/', async (req, res) => {
@@ -98,13 +129,12 @@ router.get('/slug/:slug', async (req, res) => {
 });
 
 // Create product (Seller only)
-router.post('/', auth, rbac(['SELLER']), [
+router.post('/', auth, rbac(['SELLER']), upload.array('images', 8), [
   body('name').trim().isLength({ min: 1 }),
   body('description').isLength({ min: 1 }),
   body('shortDescription').isLength({ min: 1 }),
   body('price').isFloat({ min: 0 }),
   body('category').trim().isLength({ min: 1 }),
-  body('mainImage').isLength({ min: 1 }),
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -117,6 +147,12 @@ router.post('/', auth, rbac(['SELLER']), [
       sellerId: req.user._id,
       slug: req.body.slug || req.body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     };
+
+    // Handle uploaded images
+    if (req.files && req.files.length > 0) {
+      productData.images = req.files.map(file => `/uploads/products/${file.filename}`);
+      productData.image = `/uploads/products/${req.files[0].filename}`;
+    }
 
     const product = new Product(productData);
     await product.save();

@@ -6,8 +6,38 @@ const Shop = require('../models/Shop');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const Payment = require('../models/Payment');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const router = express.Router();
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, '..', 'uploads', 'logos');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Seules les images sont autorisées'));
+    }
+  }
+});
 
 // Get dashboard stats
 router.get('/dashboard/stats', auth, rbac(['ADMIN']), async (req, res) => {
@@ -567,8 +597,169 @@ router.get('/orders', auth, rbac(['ADMIN']), async (req, res) => {
       currentPage: page,
       total,
     });
+// Create shop for user (Admin only)
+router.post('/shops', auth, rbac(['ADMIN']), upload.single('logo'), async (req, res) => {
+  try {
+    const { sellerId, name, description, category, location } = req.body;
+
+    // Validate required fields
+    if (!sellerId || !name) {
+      return res.status(400).json({ message: 'sellerId and name are required' });
+    }
+
+    // Check if user exists
+    const user = await User.findById(sellerId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if user already has a shop
+    const existingShop = await Shop.findOne({ sellerId });
+    if (existingShop) {
+      return res.status(400).json({ message: 'User already has a shop' });
+    }
+
+    const shopData = {
+      name,
+      description,
+      category,
+      location,
+      sellerId,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      status: 'ACTIVE', // Admin-created shops are automatically active
+    };
+
+    // Convert category to categories array if needed
+    if (category && !shopData.categories) {
+      shopData.categories = [category];
+    }
+
+    // Add logo if uploaded
+    if (req.file) {
+      shopData.logo = `/uploads/logos/${req.file.filename}`;
+    }
+
+    const shop = new Shop(shopData);
+    await shop.save();
+
+    // Update user role to SELLER if not already
+    if (user.role !== 'SELLER') {
+      await User.findByIdAndUpdate(sellerId, { role: 'SELLER' });
+    }
+
+    res.status(201).json(shop);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.code === 11000) {
+      res.status(400).json({ message: 'Shop slug already exists' });
+    } else {
+      res.status(500).json({ message: error.message });
+    }
+  }
+});
+
+// Configure multer for product images
+const productStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, '..', 'uploads', 'products');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, `${unique}${ext}`);
+  }
+});
+
+const productUpload = multer({
+  storage: productStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
+
+// Create product for user/shop (Admin only)
+router.post('/products', auth, rbac(['ADMIN']), productUpload.array('images', 8), async (req, res) => {
+  try {
+    const {
+      sellerId,
+      shopId,
+      name,
+      description,
+      shortDescription,
+      price,
+      category,
+      tags,
+      stock,
+      isFeatured
+    } = req.body;
+
+    // Validate required fields
+    if (!sellerId || !shopId || !name || !description || !price || !category) {
+      return res.status(400).json({
+        message: 'sellerId, shopId, name, description, price, and category are required'
+      });
+    }
+
+    // Check if user exists
+    const user = await User.findById(sellerId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if shop exists and belongs to the user
+    const shop = await Shop.findById(shopId);
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    if (shop.sellerId.toString() !== sellerId) {
+      return res.status(400).json({ message: 'Shop does not belong to the specified user' });
+    }
+
+    const productData = {
+      name,
+      description,
+      shortDescription,
+      price: Number(price),
+      category,
+      sellerId,
+      shopId,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      stock: stock ? Number(stock) : 0,
+      isFeatured: isFeatured === 'true',
+      status: 'ACTIVE', // Admin-created products are automatically active
+      isApproved: true, // Admin-created products are automatically approved
+    };
+
+    // Handle tags
+    if (tags) {
+      productData.tags = Array.isArray(tags) ? tags : tags.split(',').map(tag => tag.trim());
+    }
+
+    // Handle uploaded images
+    if (req.files && req.files.length > 0) {
+      productData.images = req.files.map(file => `/uploads/products/${file.filename}`);
+      productData.image = `/uploads/products/${req.files[0].filename}`;
+    }
+
+    const product = new Product(productData);
+    await product.save();
+
+    res.status(201).json(product);
+  } catch (error) {
+    if (error.code === 11000) {
+      res.status(400).json({ message: 'Product slug already exists' });
+    } else {
+      res.status(500).json({ message: error.message });
+    }
   }
 });
 
