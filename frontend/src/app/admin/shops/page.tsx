@@ -219,12 +219,6 @@ export default function AdminShopsPage() {
     router.push(`/admin/shops/${shop._id || shop.id}/edit`);
   };
 
-  const handleRejectClick = (shopId: string) => {
-    setSelectedShop(shops.find(s => (s._id || s.id) === shopId) || null);
-    setShowRejectModal(true);
-    setShowActionMenu(null);
-  };
-
   if (isLoading) {
     return (
       <AdminLayout title="Gestion des boutiques" subtitle="Gérer les boutiques">
