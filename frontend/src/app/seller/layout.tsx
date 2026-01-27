@@ -50,7 +50,7 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
           </div>
           <div>
             <h1 className="font-bold text-gray-900">Seller Hub</h1>
-            <p className="text-xs text-gray-600">{user?.shopName || 'Ma Boutique'}</p>
+            <p className="text-xs text-gray-600">{user?.firstName || 'Ma Boutique'}</p>
           </div>
         </div>
 
