@@ -320,7 +320,7 @@ export default function AdminShopsPage() {
                                 alt={shop.name}
                                 className="object-contain h-full w-full p-2"
                                 onError={(e) => {
-                                  const container = this.parentElement;
+                                  const container = (e.target as HTMLImageElement).parentElement;
                                   if (container) {
                                     container.innerHTML = `
                                       <div class="w-10 h-10 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center text-sm font-bold text-pink-700">
@@ -481,7 +481,7 @@ export default function AdminShopsPage() {
                             alt={shop.name}
                             className="object-contain h-full w-full p-2"
                             onError={(e) => {
-                              const container = this.parentElement;
+                              const container = (e.target as HTMLImageElement).parentElement;
                               if (container) {
                                 container.innerHTML = `
                                   <div class="w-10 h-10 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center text-sm font-bold text-pink-700">
