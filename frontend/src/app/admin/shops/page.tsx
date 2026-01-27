@@ -53,14 +53,6 @@ export default function AdminShopsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingShop, setEditingShop] = useState<Shop | null>(null);
-  const [editForm, setEditForm] = useState({
-    name: '',
-    description: '',
-    category: '',
-    location: ''
-  });
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [showActionMenu, setShowActionMenu] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -224,33 +216,13 @@ export default function AdminShopsPage() {
   };
 
   const handleEditShop = (shop: Shop) => {
-    setEditingShop(shop);
-    setEditForm({
-      name: shop.name,
-      description: shop.description || '',
-      category: shop.category,
-      location: shop.location || ''
-    });
-    setShowEditModal(true);
-    setShowActionMenu(null);
+    router.push(`/admin/shops/${shop._id || shop.id}/edit`);
   };
 
-  const handleUpdateShop = async () => {
-    if (!editingShop) return;
-    try {
-      setActionLoading(editingShop._id || editingShop.id || '');
-      const shopId = editingShop._id || editingShop.id || '';
-      await api.updateShopAdmin(shopId, editForm);
-      await fetchShops();
-      setShowEditModal(false);
-      setEditingShop(null);
-      alert('Boutique mise à jour avec succès');
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error);
-      alert('Erreur lors de la mise à jour');
-    } finally {
-      setActionLoading(null);
-    }
+  const handleRejectClick = (shopId: string) => {
+    setSelectedShop(shops.find(s => (s._id || s.id) === shopId) || null);
+    setShowRejectModal(true);
+    setShowActionMenu(null);
   };
 
   if (isLoading) {
@@ -347,11 +319,29 @@ export default function AdminShopsPage() {
                     <tr key={shopId} className="hover:bg-slate-50 transition-colors duration-150 border-b border-gray-100 last:border-b-0">
                       <td className="px-6 py-4">
                         <div className="flex items-center">
-                          <div className="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
+                          <div className="w-14 h-14 bg-gradient-to-br from-pink-50 to-orange-50 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
                             {shop.logo ? (
-                              <Image src={shop.logo} alt={shop.name} width={56} height={56} className="object-cover" />
+                              <img
+                                src={shop.logo.startsWith('http') ? shop.logo : `http://72.62.71.97:3001${shop.logo}`}
+                                alt={shop.name}
+                                className="object-contain h-full w-full p-2"
+                                onError={(e) => {
+                                  const container = this.parentElement;
+                                  if (container) {
+                                    container.innerHTML = `
+                                      <div class="w-10 h-10 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center text-sm font-bold text-pink-700">
+                                        ${shop.name.charAt(0).toUpperCase()}
+                                      </div>
+                                    `;
+                                  }
+                                }}
+                              />
                             ) : (
-                              <Store className="w-7 h-7 text-gray-400" />
+                              <div className="w-10 h-10 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center">
+                                <span className="text-sm font-bold text-pink-700">
+                                  {shop.name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
                             )}
                           </div>
                           <div className="ml-4">
@@ -490,11 +480,29 @@ export default function AdminShopsPage() {
                 <div key={shopId} className="p-4 hover:bg-slate-50 transition-colors duration-150">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
+                      <div className="w-14 h-14 bg-gradient-to-br from-pink-50 to-orange-50 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
                         {shop.logo ? (
-                          <Image src={shop.logo} alt={shop.name} width={56} height={56} className="object-cover" />
+                          <img
+                            src={shop.logo.startsWith('http') ? shop.logo : `http://72.62.71.97:3001${shop.logo}`}
+                            alt={shop.name}
+                            className="object-contain h-full w-full p-2"
+                            onError={(e) => {
+                              const container = this.parentElement;
+                              if (container) {
+                                container.innerHTML = `
+                                  <div class="w-10 h-10 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center text-sm font-bold text-pink-700">
+                                    ${shop.name.charAt(0).toUpperCase()}
+                                  </div>
+                                `;
+                              }
+                            }}
+                          />
                         ) : (
-                          <Store className="w-7 h-7 text-gray-400" />
+                          <div className="w-10 h-10 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-bold text-pink-700">
+                              {shop.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -594,81 +602,6 @@ export default function AdminShopsPage() {
       </div>
 
       {/* Edit Modal */}
-      {showEditModal && editingShop && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={() => setShowEditModal(false)} />
-            <div className="relative bg-white rounded-lg p-6 max-w-md w-full">
-              <div className="flex items-center mb-4">
-                <Edit className="h-6 w-6 text-blue-600 mr-2" />
-                <h3 className="text-lg font-medium">Modifier la boutique</h3>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                  <input
-                    type="text"
-                    value={editForm.name}
-                    onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea
-                    value={editForm.description}
-                    onChange={(e) => setEditForm({...editForm, description: e.target.value})}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
-                  <select
-                    value={editForm.category}
-                    onChange={(e) => setEditForm({...editForm, category: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="Mode">Mode</option>
-                    <option value="Cosmétiques">Cosmétiques</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Localisation</label>
-                  <input
-                    type="text"
-                    value={editForm.location}
-                    onChange={(e) => setEditForm({...editForm, location: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex gap-2 justify-end mt-6">
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  disabled={actionLoading !== null}
-                  className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleUpdateShop}
-                  disabled={actionLoading !== null}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {actionLoading ? 'Mise à jour...' : 'Mettre à jour'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Delete Modal */}
       {showDeleteConfirm && selectedShop && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
