@@ -24,12 +24,12 @@ export default function PartnerLogos() {
 
   const fetchShops = async () => {
     try {
-      const data = await api.getShops({ status: 'APPROVED', limit: 100 });
-      // Filtrer pour ne montrer que les boutiques approuvées
-      const approvedShops = (data?.data || data || []).filter(
-        (shop: any) => shop.status === 'APPROVED' || !shop.status
+      const data = await api.getShops({ status: 'ACTIVE', limit: 100 });
+      // Filtrer pour ne montrer que les boutiques actives avec un logo
+      const shopsWithLogos = (data?.data || data || []).filter(
+        (shop: any) => (shop.status === 'ACTIVE' || shop.status === 'APPROVED') && shop.logo
       );
-      setShops(approvedShops || []);
+      setShops(shopsWithLogos || []);
     } catch (error) {
       console.error('Erreur chargement boutiques:', error);
     } finally {
@@ -72,14 +72,19 @@ export default function PartnerLogos() {
                     className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
-                      const span = document.createElement('span');
-                      span.className = 'text-2xl font-bold text-gray-400';
-                      span.textContent = shop.name.charAt(0);
-                      e.currentTarget.parentElement?.appendChild(span);
+                      const container = e.currentTarget.parentElement;
+                      if (container) {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'w-16 h-16 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center text-xl font-bold text-pink-700 shadow-lg';
+                        fallback.textContent = shop.name.charAt(0).toUpperCase();
+                        container.appendChild(fallback);
+                      }
                     }}
                   />
                 ) : (
-                  <span className="text-2xl font-bold text-gray-400">{shop.name.charAt(0).toUpperCase()}</span>
+                  <div className="w-16 h-16 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center shadow-lg">
+                    <span className="text-xl font-bold text-pink-700">{shop.name.charAt(0).toUpperCase()}</span>
+                  </div>
                 )}
               </div>
               <p className="text-center text-xs font-bold text-gray-600 mt-2 group-hover:text-pink-600 transition-colors">
@@ -109,14 +114,19 @@ export default function PartnerLogos() {
                     className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
-                      const span = document.createElement('span');
-                      span.className = 'text-lg sm:text-2xl font-bold text-gray-400';
-                      span.textContent = shop.name.charAt(0).toUpperCase();
-                      e.currentTarget.parentElement?.appendChild(span);
+                      const container = e.currentTarget.parentElement;
+                      if (container) {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center text-sm sm:text-lg font-bold text-pink-700 shadow-lg';
+                        fallback.textContent = shop.name.charAt(0).toUpperCase();
+                        container.appendChild(fallback);
+                      }
                     }}
                   />
                 ) : (
-                  <span className="text-lg sm:text-2xl font-bold text-gray-400">{shop.name.charAt(0).toUpperCase()}</span>
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center shadow-lg">
+                    <span className="text-sm sm:text-lg font-bold text-pink-700">{shop.name.charAt(0).toUpperCase()}</span>
+                  </div>
                 )}
               </div>
               <p className="text-center text-xs font-bold text-gray-600 mt-2 group-hover:text-pink-600 transition-colors leading-tight line-clamp-2">

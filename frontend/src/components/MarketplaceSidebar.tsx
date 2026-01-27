@@ -77,7 +77,7 @@ export default function MarketplaceSidebar({
                       }`}
                     >
                       {/* Shop Logo thumbnail */}
-                      {logoUrl && (
+                      {logoUrl ? (
                         <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
                           <img
                             src={logoUrl}
@@ -85,8 +85,19 @@ export default function MarketplaceSidebar({
                             className="object-contain w-full h-full p-0.5"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
+                              const container = e.currentTarget.parentElement;
+                              if (container) {
+                                const fallback = document.createElement('div');
+                                fallback.className = 'w-full h-full bg-gradient-to-br from-pink-200 to-rose-200 rounded-md flex items-center justify-center text-xs font-bold text-pink-700';
+                                fallback.textContent = shop.name.charAt(0).toUpperCase();
+                                container.appendChild(fallback);
+                              }
                             }}
                           />
+                        </div>
+                      ) : (
+                        <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 bg-gradient-to-br from-pink-200 to-rose-200 rounded-md flex items-center justify-center">
+                          <span className="text-xs font-bold text-pink-700">{shop.name.charAt(0).toUpperCase()}</span>
                         </div>
                       )}
                       

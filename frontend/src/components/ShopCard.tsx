@@ -34,14 +34,18 @@ export default function ShopCard({ shop }: ShopCardProps) {
                 e.currentTarget.style.display = 'none';
                 const container = e.currentTarget.parentElement;
                 if (container) {
-                  container.innerHTML = `<div class="w-20 h-20 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center text-2xl font-bold text-pink-700">${shop.name.charAt(0)}</div>`;
+                  container.innerHTML = `
+                    <div class="w-20 h-20 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center text-2xl font-bold text-pink-700 shadow-lg">
+                      ${shop.name.charAt(0).toUpperCase()}
+                    </div>
+                  `;
                 }
               }}
             />
           ) : (
-            <div className="w-20 h-20 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center shadow-lg">
               <span className="text-2xl font-bold text-pink-700">
-                {shop.name.charAt(0)}
+                {shop.name.charAt(0).toUpperCase()}
               </span>
             </div>
           )}
