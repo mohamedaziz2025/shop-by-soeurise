@@ -600,7 +600,21 @@ router.get('/orders', auth, rbac(['ADMIN']), async (req, res) => {
 // Create shop for user (Admin only)
 router.post('/shops', auth, rbac(['ADMIN']), upload.single('logo'), async (req, res) => {
   try {
-    const { sellerId, name, description, category, location } = req.body;
+    const {
+      sellerId,
+      name,
+      description,
+      category,
+      categories,
+      shippingPrice,
+      phone,
+      address,
+      city,
+      postalCode,
+      country,
+      returnPolicy,
+      location
+    } = req.body;
 
     // Validate required fields
     if (!sellerId || !name) {
@@ -619,20 +633,35 @@ router.post('/shops', auth, rbac(['ADMIN']), upload.single('logo'), async (req, 
       return res.status(400).json({ message: 'User already has a shop' });
     }
 
+    // Build location string from address components
+    let locationString = location;
+    if (!locationString && (address || city || postalCode || country)) {
+      const addressParts = [address, city, postalCode, country].filter(Boolean);
+      locationString = addressParts.join(', ');
+    }
+
     const shopData = {
       name,
       description,
-      category,
-      location,
+      category: category || (categories && categories.length > 0 ? categories[0] : undefined),
+      categories: categories || (category ? [category] : []),
       sellerId,
       slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       status: 'ACTIVE', // Admin-created shops are automatically active
+      // Contact information
+      phone,
+      address,
+      city,
+      postalCode,
+      country: country || 'France',
+      // Business information
+      returnPolicy,
+      // Shipping configuration
+      shippingConfig: shippingPrice ? {
+        enabled: true,
+        flatRate: parseFloat(shippingPrice),
+      } : undefined,
     };
-
-    // Convert category to categories array if needed
-    if (category && !shopData.categories) {
-      shopData.categories = [category];
-    }
 
     // Add logo if uploaded
     if (req.file) {
