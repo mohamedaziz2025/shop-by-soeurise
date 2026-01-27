@@ -113,8 +113,8 @@ export default function SellerLayout({
       </header>
 
       <div className="flex">
-        {/* Sidebar for Desktop */}
-        <aside className="hidden lg:block w-64 bg-white border-r border-gray-200/50 min-h-screen sticky top-16 shadow-sm">
+        {/* Sidebar for Desktop - Fixed */}
+        <aside className="hidden lg:block w-64 bg-white border-r border-gray-200/50 min-h-screen fixed top-16 left-0 shadow-sm overflow-y-auto">
           <nav className="p-4 space-y-1">
             {SIDEBAR_ITEMS.map((item) => (
               <Link
@@ -210,7 +210,7 @@ export default function SellerLayout({
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-8 relative">
+        <main className="flex-1 lg:ml-64 p-4 md:p-8 relative">
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
