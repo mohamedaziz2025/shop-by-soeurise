@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User, UserDocument } from '../schemas/user.schema';
+import { User, UserDocument, UserRole } from '../schemas/user.schema';
+import slugify from 'slugify';
 import { Shop, ShopDocument } from '../schemas/shop.schema';
 import { Product, ProductDocument } from '../schemas/product.schema';
 import { Order, OrderDocument } from '../schemas/order.schema';
@@ -321,6 +322,47 @@ export class AdminService {
       .find()
       .populate('sellerId', 'firstName lastName email')
       .sort({ createdAt: -1 });
+  }
+
+  async createShopForUser(sellerId: string, createShopDto: any) {
+    // Vérifier que l'utilisateur existe
+    const user = await this.userModel.findById(sellerId);
+    if (!user) {
+      throw new Error('Utilisateur introuvable');
+    }
+
+    // Vérifier si le vendeur a déjà une boutique
+    const existingShop = await this.shopModel.findOne({ sellerId });
+    if (existingShop) {
+      throw new Error('L\'utilisateur a déjà une boutique');
+    }
+
+    // Si l'utilisateur est CLIENT, le passer en SELLER
+    if (user.role === UserRole.CLIENT) {
+      user.role = UserRole.SELLER;
+      await user.save();
+    }
+
+    // Vérifier que l'utilisateur est maintenant vendeur
+    if (user.role !== UserRole.SELLER) {
+      throw new Error('Seuls les vendeurs peuvent avoir une boutique');
+    }
+
+    // Générer le slug et vérifier l'unicité
+    const slug = slugify(createShopDto.name || createShopDto.title || 'shop', { lower: true, strict: true });
+    const existingSlug = await this.shopModel.findOne({ slug });
+    if (existingSlug) {
+      throw new Error('Ce nom de boutique est déjà utilisé');
+    }
+
+    const shop = new this.shopModel({
+      ...createShopDto,
+      sellerId,
+      slug,
+    });
+
+    await shop.save();
+    return shop;
   }
 
   async createProductForShop(productData: any) {

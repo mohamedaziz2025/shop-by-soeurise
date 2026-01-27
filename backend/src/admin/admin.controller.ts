@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Patch, Query, Body, Param, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { Controller, Get, Post, Put, Delete, Patch, Query, Body, Param, UseGuards, UseInterceptors, UploadedFiles, UploadedFile } from '@nestjs/common';
+import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { AdminService } from './admin.service';
@@ -151,6 +151,30 @@ export class AdminController {
   @Patch('shops/:id/activate')
   async activateShop(@Param('id') shopId: string) {
     return this.adminService.activateShop(shopId);
+  }
+
+  // Admin create shop for a given user (supports optional logo upload)
+  @UseInterceptors(
+    FileInterceptor('logo', {
+      storage: diskStorage({
+        destination: './uploads/logos',
+        filename: (req, file, cb) => {
+          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `${unique}${ext}`);
+        },
+      }),
+      limits: { fileSize: 2 * 1024 * 1024 },
+    }),
+  )
+  @Post('shops')
+  async createShop(@Body() shopData: any, @UploadedFile() logo?: Express.Multer.File) {
+    if (logo) {
+      shopData.logo = `/uploads/logos/${logo.filename}`;
+    }
+
+    const sellerId = shopData.sellerId || shopData.ownerId;
+    return this.adminService.createShopForUser(sellerId, shopData);
   }
 
   // Admin product creation - allows creating product for any shop (supports file uploads)
