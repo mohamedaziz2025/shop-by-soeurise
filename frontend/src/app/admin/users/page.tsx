@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
             <p className="text-sm text-gray-600">Gérez et modifiez tous les utilisateurs de la plateforme</p>
           </div>
           <a
-            href="/admin/users/new"
+            href="/admin/users/create"
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
           >
             <User className="w-4 h-4" />

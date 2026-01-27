@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import { api } from '@/lib/api';
 import {
@@ -15,7 +16,8 @@ import {
   Clock,
   Trash2,
   Edit,
-  Star
+  Star,
+  Plus
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -44,6 +46,7 @@ interface Product {
 }
 
 export default function AdminProductsPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -167,6 +170,18 @@ export default function AdminProductsPage() {
   return (
     <AdminLayout title="Gestion des produits" subtitle="Gérer les produits">
       <div className="space-y-4 sm:space-y-6">
+        {/* Header with Create Button */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-lg font-semibold text-gray-900">Tous les produits</h2>
+          <button
+            onClick={() => router.push('/admin/products/create')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium whitespace-nowrap"
+          >
+            <Plus className="w-5 h-5" />
+            Créer un produit
+          </button>
+        </div>
+
         {/* Filters */}
         <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex flex-col lg:flex-row gap-4">

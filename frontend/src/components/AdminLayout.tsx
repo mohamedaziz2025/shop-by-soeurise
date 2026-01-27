@@ -75,9 +75,9 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto lg:flex-shrink-0`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600">
@@ -149,7 +149,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
       )}
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col lg:ml-64">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
           <div className="px-3 sm:px-4 lg:px-8">
@@ -214,7 +214,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
         </header>
 
         {/* Page content */}
-        <main className="flex-1 px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 overflow-x-hidden">
+        <main className="flex-1 px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 overflow-y-auto overflow-x-hidden">
           {children}
         </main>
       </div>
