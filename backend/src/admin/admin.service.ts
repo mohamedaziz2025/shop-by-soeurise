@@ -347,4 +347,216 @@ export class AdminService {
 
     return product;
   }
-}
+
+  // ============= USER MANAGEMENT =============
+
+  async getUserDetail(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    // Récupérer ses commandes
+    const orders = await this.orderModel.find({ userId }).sort({ createdAt: -1 });
+    
+    // Récupérer ses informations d'achat
+    const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
+    const orderCount = orders.length;
+    const lastOrderDate = orders.length > 0 ? orders[0].createdAt : null;
+
+    return {
+      ...user.toObject(),
+      totalSpent,
+      orderCount,
+      lastOrderDate,
+      recentOrders: orders.slice(0, 5),
+    };
+  }
+
+  async updateUser(userId: string, userData: any) {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phone: userData.phone,
+        role: userData.role,
+        status: userData.status,
+      },
+      { new: true },
+    );
+
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    return user;
+  }
+
+  async deleteUser(userId: string) {
+    const user = await this.userModel.findByIdAndDelete(userId);
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+    return { message: 'Utilisateur supprimé avec succès' };
+  }
+
+  async banUser(userId: string, reason?: string) {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      {
+        status: 'SUSPENDED',
+        suspendedReason: reason || 'Banni par l\'administrateur',
+      },
+      { new: true },
+    );
+
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    return user;
+  }
+
+  async unbanUser(userId: string) {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      {
+        status: 'ACTIVE',
+        suspendedReason: null,
+      },
+      { new: true },
+    );
+
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    return user;
+  }
+
+  // ============= SHOP MANAGEMENT =============
+
+  async getShopDetail(shopId: string) {
+    const shop = await this.shopModel
+      .findById(shopId)
+      .populate('sellerId', 'firstName lastName email');
+
+    if (!shop) {
+      throw new Error('Boutique non trouvée');
+    }
+
+    // Récupérer les produits de la boutique
+    const products = await this.productModel.find({ shopId }).sort({ createdAt: -1 });
+
+    // Récupérer les commandes de la boutique
+    const orders = await this.orderModel.find({ 'items.shopId': shopId }).sort({ createdAt: -1 });
+
+    const totalSales = orders.reduce((sum, order) => sum + order.total, 0);
+
+    return {
+      ...shop.toObject(),
+      productsCount: products.length,
+      ordersCount: orders.length,
+      totalSales,
+      recentProducts: products.slice(0, 5),
+      recentOrders: orders.slice(0, 5),
+    };
+  }
+
+  async updateShop(shopId: string, shopData: any) {
+    const shop = await this.shopModel.findByIdAndUpdate(
+      shopId,
+      {
+        name: shopData.name,
+        description: shopData.description,
+        category: shopData.category,
+        location: shopData.location,
+      },
+      { new: true },
+    );
+
+    if (!shop) {
+      throw new Error('Boutique non trouvée');
+    }
+
+    return shop;
+  }
+
+  async deleteShop(shopId: string) {
+    const shop = await this.shopModel.findByIdAndDelete(shopId);
+    if (!shop) {
+      throw new Error('Boutique non trouvée');
+    }
+
+    // Supprimer aussi les produits de la boutique
+    await this.productModel.deleteMany({ shopId });
+
+    return { message: 'Boutique supprimée avec succès' };
+  }
+
+  async approveShop(shopId: string) {
+    const shop = await this.shopModel.findByIdAndUpdate(
+      shopId,
+      { status: 'APPROVED' },
+      { new: true },
+    );
+
+    if (!shop) {
+      throw new Error('Boutique non trouvée');
+    }
+
+    return shop;
+  }
+
+  async rejectShop(shopId: string, reason: string) {
+    const shop = await this.shopModel.findByIdAndUpdate(
+      shopId,
+      {
+        status: 'REJECTED',
+        rejectionReason: reason || 'Rejeté par l\'administrateur',
+      },
+      { new: true },
+    );
+
+    if (!shop) {
+      throw new Error('Boutique non trouvée');
+    }
+
+    return shop;
+  }
+
+  async suspendShop(shopId: string, reason?: string) {
+    const shop = await this.shopModel.findByIdAndUpdate(
+      shopId,
+      {
+        status: 'SUSPENDED',
+        suspendedReason: reason || 'Suspendu par l\'administrateur',
+      },
+      { new: true },
+    );
+
+    if (!shop) {
+      throw new Error('Boutique non trouvée');
+    }
+
+    return shop;
+  }
+
+  async activateShop(shopId: string) {
+    const shop = await this.shopModel.findByIdAndUpdate(
+      shopId,
+      {
+        status: 'APPROVED',
+        suspendedReason: null,
+      },
+      { new: true },
+    );
+
+    if (!shop) {
+      throw new Error('Boutique non trouvée');
+    }
+
+    return shop;
+  }

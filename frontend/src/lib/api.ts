@@ -417,12 +417,12 @@ class ApiClient {
   }
 
   async banUser(userId: string, reason?: string) {
-    const { data } = await this.client.put(`/admin/users/${userId}/ban`, { reason });
+    const { data } = await this.client.patch(`/admin/users/${userId}/ban`, { reason });
     return data;
   }
 
   async unbanUser(userId: string) {
-    const { data } = await this.client.put(`/admin/users/${userId}/unban`);
+    const { data } = await this.client.patch(`/admin/users/${userId}/unban`, {});
     return data;
   }
 

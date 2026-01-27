@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Patch, Query, Body, Param, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -85,9 +85,69 @@ export class AdminController {
     return this.adminService.getAllUsers(filters);
   }
 
+  @Get('users/:id')
+  async getUserDetail(@Param('id') userId: string) {
+    return this.adminService.getUserDetail(userId);
+  }
+
+  @Put('users/:id')
+  async updateUser(@Param('id') userId: string, @Body() userData: any) {
+    return this.adminService.updateUser(userId, userData);
+  }
+
+  @Delete('users/:id')
+  async deleteUser(@Param('id') userId: string) {
+    return this.adminService.deleteUser(userId);
+  }
+
+  @Patch('users/:id/ban')
+  async banUser(@Param('id') userId: string, @Body() body: { reason?: string }) {
+    return this.adminService.banUser(userId, body.reason);
+  }
+
+  @Patch('users/:id/unban')
+  async unbanUser(@Param('id') userId: string) {
+    return this.adminService.unbanUser(userId);
+  }
+
   @Get('shops')
   async getAllShops() {
     return this.adminService.getAllShops();
+  }
+
+  @Get('shops/:id')
+  async getShopDetail(@Param('id') shopId: string) {
+    return this.adminService.getShopDetail(shopId);
+  }
+
+  @Put('shops/:id')
+  async updateShop(@Param('id') shopId: string, @Body() shopData: any) {
+    return this.adminService.updateShop(shopId, shopData);
+  }
+
+  @Delete('shops/:id')
+  async deleteShop(@Param('id') shopId: string) {
+    return this.adminService.deleteShop(shopId);
+  }
+
+  @Patch('shops/:id/approve')
+  async approveShop(@Param('id') shopId: string) {
+    return this.adminService.approveShop(shopId);
+  }
+
+  @Patch('shops/:id/reject')
+  async rejectShop(@Param('id') shopId: string, @Body() body: { reason: string }) {
+    return this.adminService.rejectShop(shopId, body.reason);
+  }
+
+  @Patch('shops/:id/suspend')
+  async suspendShop(@Param('id') shopId: string, @Body() body: { reason?: string }) {
+    return this.adminService.suspendShop(shopId, body.reason);
+  }
+
+  @Patch('shops/:id/activate')
+  async activateShop(@Param('id') shopId: string) {
+    return this.adminService.activateShop(shopId);
   }
 
   // Admin product creation - allows creating product for any shop

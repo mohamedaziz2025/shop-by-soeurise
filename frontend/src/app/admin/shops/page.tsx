@@ -64,6 +64,9 @@ export default function AdminShopsPage() {
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [showActionMenu, setShowActionMenu] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     fetchShops();
@@ -130,54 +133,89 @@ export default function AdminShopsPage() {
 
   const handleApprove = async (shopId: string) => {
     try {
+      setActionLoading(shopId);
       await api.approveShopAdmin(shopId);
       await fetchShops();
       setShowActionMenu(null);
+      alert('Boutique approuvée avec succès');
     } catch (error) {
       console.error('Erreur lors de l\'approbation:', error);
+      alert('Erreur lors de l\'approbation');
+    } finally {
+      setActionLoading(null);
     }
   };
 
-  const handleReject = async (shopId: string) => {
+  const handleRejectClick = (shopId: string) => {
+    setSelectedShop(shops.find(s => (s._id || s.id) === shopId) || null);
+    setRejectReason('');
+    setShowRejectModal(true);
+    setShowActionMenu(null);
+  };
+
+  const handleRejectSubmit = async () => {
+    if (!selectedShop) return;
     try {
-      await api.rejectShopAdmin(shopId, 'Rejeté par l\'administrateur');
+      setActionLoading(selectedShop._id || selectedShop.id || '');
+      await api.rejectShopAdmin(selectedShop._id || selectedShop.id || '', rejectReason || 'Rejeté par l\'administrateur');
       await fetchShops();
-      setShowActionMenu(null);
+      setShowRejectModal(false);
+      setSelectedShop(null);
+      setRejectReason('');
+      alert('Boutique rejetée avec succès');
     } catch (error) {
       console.error('Erreur lors du rejet:', error);
+      alert('Erreur lors du rejet');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleSuspend = async (shopId: string) => {
     try {
+      setActionLoading(shopId);
       await api.suspendShopAdmin(shopId);
       await fetchShops();
       setShowActionMenu(null);
+      alert('Boutique suspendue avec succès');
     } catch (error) {
       console.error('Erreur lors de la suspension:', error);
+      alert('Erreur lors de la suspension');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleDelete = async () => {
     if (!selectedShop) return;
     try {
+      setActionLoading(selectedShop._id || selectedShop.id || '');
       const shopId = selectedShop._id || selectedShop.id || '';
       await api.deleteShopAdmin(shopId);
       await fetchShops();
       setShowDeleteConfirm(false);
       setSelectedShop(null);
+      alert('Boutique supprimée avec succès');
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
+      alert('Erreur lors de la suppression');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleActivate = async (shopId: string) => {
     try {
+      setActionLoading(shopId);
       await api.approveShopAdmin(shopId);
       await fetchShops();
       setShowActionMenu(null);
+      alert('Boutique activée avec succès');
     } catch (error) {
       console.error('Erreur lors de l\'activation:', error);
+      alert('Erreur lors de l\'activation');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -200,13 +238,18 @@ export default function AdminShopsPage() {
   const handleUpdateShop = async () => {
     if (!editingShop) return;
     try {
+      setActionLoading(editingShop._id || editingShop.id || '');
       const shopId = editingShop._id || editingShop.id || '';
       await api.updateShopAdmin(shopId, editForm);
       await fetchShops();
       setShowEditModal(false);
       setEditingShop(null);
+      alert('Boutique mise à jour avec succès');
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
+      alert('Erreur lors de la mise à jour');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -276,42 +319,43 @@ export default function AdminShopsPage() {
         </div>
 
         {/* Shops List */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
-            <h3 className="text-base sm:text-lg font-medium text-gray-900">
+        <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+          <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
               {filteredShops.length} boutique{filteredShops.length > 1 ? 's' : ''}
             </h3>
+            <p className="text-sm text-gray-500 mt-1">Gestion complète des boutiques vendeurs</p>
           </div>
 
           {/* Desktop Table */}
           <div className="hidden lg:block overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Boutique</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Propriétaire</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produits</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ventes</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-gradient-to-r from-slate-900 to-slate-800 text-white">
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Boutique</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Propriétaire</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Statut</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Produits</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Ventes</th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-100">
                 {filteredShops.map((shop) => {
                   const shopId = shop._id || shop.id || '';
                   return (
-                    <tr key={shopId} className="hover:bg-gray-50">
+                    <tr key={shopId} className="hover:bg-slate-50 transition-colors duration-150 border-b border-gray-100 last:border-b-0">
                       <td className="px-6 py-4">
                         <div className="flex items-center">
-                          <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                          <div className="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
                             {shop.logo ? (
-                              <Image src={shop.logo} alt={shop.name} width={48} height={48} className="object-cover" />
+                              <Image src={shop.logo} alt={shop.name} width={56} height={56} className="object-cover" />
                             ) : (
-                              <Store className="w-6 h-6 text-gray-400" />
+                              <Store className="w-7 h-7 text-gray-400" />
                             )}
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{shop.name}</div>
+                            <div className="text-sm font-semibold text-gray-900">{shop.name}</div>
                             <div className="text-xs text-gray-500">{shop.category}</div>
                             {shop.location && (
                               <div className="text-xs text-gray-500 flex items-center mt-1">
@@ -323,82 +367,95 @@ export default function AdminShopsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center text-sm text-gray-900">
-                          <User className="w-4 h-4 mr-2 text-gray-400" />
-                          {shop.owner?.firstName} {shop.owner?.lastName}
+                        <div className="flex items-center text-sm font-medium text-gray-900">
+                          <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center mr-2 flex-shrink-0">
+                            <User className="w-4 h-4 text-gray-600" />
+                          </div>
+                          <div>
+                            <div>{shop.owner?.firstName} {shop.owner?.lastName}</div>
+                            <div className="text-xs text-gray-500 font-normal">{shop.owner?.email}</div>
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500">{shop.owner?.email}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shop.status)}`}>
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${getStatusColor(shop.status)} border-0`}>
                           {getStatusIcon(shop.status)}
-                          <span className="ml-1">{shop.status}</span>
+                          <span>{shop.status}</span>
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <Package className="w-4 h-4 mr-1 text-gray-400" />
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                          <Package className="w-4 h-4 text-gray-400" />
                           {shop.productsCount || 0}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                         {shop.totalSales || 0} €
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="relative inline-block">
                           <button
                             onClick={() => setShowActionMenu(showActionMenu === shopId ? null : shopId)}
-                            className="text-gray-400 hover:text-gray-600 p-1"
+                            className="text-gray-400 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                           >
                             <MoreHorizontal className="w-5 h-5" />
                           </button>
                           {showActionMenu === shopId && (
                             <>
                               <div className="fixed inset-0 z-10" onClick={() => setShowActionMenu(null)} />
-                              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border">
-                                <div className="py-1">
+                              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl z-20 border border-gray-200 overflow-hidden">
+                                <div className="py-2">
                                   <button 
                                     onClick={() => handleViewShop(shop)}
-                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                    className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 w-full text-left transition-colors"
                                   >
-                                    <Eye className="w-4 h-4 mr-2" />Voir la boutique
+                                    <Eye className="w-4 h-4 mr-3 text-gray-400" />Voir la boutique
                                   </button>
                                   <button 
                                     onClick={() => handleEditShop(shop)}
-                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                    className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 w-full text-left transition-colors"
                                   >
-                                    <Edit className="w-4 h-4 mr-2" />Modifier
+                                    <Edit className="w-4 h-4 mr-3 text-gray-400" />Modifier
                                   </button>
+                                  <div className="border-t border-gray-100 my-1"></div>
                                   {shop.status === 'PENDING_APPROVAL' && (
                                     <>
                                       <button
                                         onClick={() => handleApprove(shopId)}
-                                        className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left"
+                                        disabled={actionLoading !== null}
+                                        className="flex items-center px-4 py-2.5 text-sm text-green-600 hover:bg-green-50 w-full text-left disabled:opacity-50 transition-colors"
                                       >
-                                        <CheckCircle className="w-4 h-4 mr-2" />Approuver
+                                        <CheckCircle className="w-4 h-4 mr-3" />
+                                        {actionLoading === shopId ? 'Approbation...' : 'Approuver'}
                                       </button>
                                       <button
-                                        onClick={() => handleReject(shopId)}
-                                        className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                                        onClick={() => handleRejectClick(shopId)}
+                                        disabled={actionLoading !== null}
+                                        className="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full text-left disabled:opacity-50 transition-colors"
                                       >
-                                        <XCircle className="w-4 h-4 mr-2" />Rejeter
+                                        <XCircle className="w-4 h-4 mr-3" />
+                                        {actionLoading === shopId ? 'Rejet...' : 'Rejeter'}
                                       </button>
                                     </>
                                   )}
                                   {shop.status === 'APPROVED' && (
                                     <button
                                       onClick={() => handleSuspend(shopId)}
-                                      className="flex items-center px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 w-full text-left"
+                                      disabled={actionLoading !== null}
+                                      className="flex items-center px-4 py-2.5 text-sm text-orange-600 hover:bg-orange-50 w-full text-left disabled:opacity-50 transition-colors"
                                     >
-                                      <AlertTriangle className="w-4 h-4 mr-2" />Suspendre
+                                      <AlertTriangle className="w-4 h-4 mr-3" />
+                                      {actionLoading === shopId ? 'Suspension...' : 'Suspendre'}
                                     </button>
                                   )}
                                   {shop.status === 'SUSPENDED' && (
                                     <button
                                       onClick={() => handleActivate(shopId)}
-                                      className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left"
+                                      disabled={actionLoading !== null}
+                                      className="flex items-center px-4 py-2.5 text-sm text-green-600 hover:bg-green-50 w-full text-left disabled:opacity-50 transition-colors"
                                     >
-                                      <CheckCircle className="w-4 h-4 mr-2" />Activer
+                                      <CheckCircle className="w-4 h-4 mr-3" />
+                                      {actionLoading === shopId ? 'Activation...' : 'Activer'}
                                     </button>
                                   )}
                                   <button
@@ -407,9 +464,10 @@ export default function AdminShopsPage() {
                                       setShowDeleteConfirm(true);
                                       setShowActionMenu(null);
                                     }}
-                                    className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                                    disabled={actionLoading !== null}
+                                    className="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full text-left disabled:opacity-50 transition-colors"
                                   >
-                                    <Trash2 className="w-4 h-4 mr-2" />Supprimer
+                                    <Trash2 className="w-4 h-4 mr-3" />Supprimer
                                   </button>
                                 </div>
                               </div>
@@ -425,22 +483,22 @@ export default function AdminShopsPage() {
           </div>
 
           {/* Mobile Cards */}
-          <div className="lg:hidden divide-y divide-gray-200">
+          <div className="lg:hidden divide-y divide-gray-100">
             {filteredShops.map((shop) => {
               const shopId = shop._id || shop.id || '';
               return (
-                <div key={shopId} className="p-4 hover:bg-gray-50">
-                  <div className="flex items-start justify-between">
+                <div key={shopId} className="p-4 hover:bg-slate-50 transition-colors duration-150">
+                  <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <div className="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
                         {shop.logo ? (
-                          <Image src={shop.logo} alt={shop.name} width={48} height={48} className="object-cover" />
+                          <Image src={shop.logo} alt={shop.name} width={56} height={56} className="object-cover" />
                         ) : (
-                          <Store className="w-6 h-6 text-gray-400" />
+                          <Store className="w-7 h-7 text-gray-400" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{shop.name}</p>
+                        <p className="text-sm font-semibold text-gray-900 truncate">{shop.name}</p>
                         <p className="text-xs text-gray-500">{shop.category}</p>
                         <p className="text-xs text-gray-500 flex items-center mt-1">
                           <User className="w-3 h-3 mr-1" />
@@ -450,19 +508,23 @@ export default function AdminShopsPage() {
                     </div>
                     <button
                       onClick={() => setShowActionMenu(showActionMenu === shopId ? null : shopId)}
-                      className="ml-2 text-gray-400"
+                      className="ml-2 text-gray-400 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
                     >
                       <MoreHorizontal className="w-5 h-5" />
                     </button>
                   </div>
 
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(shop.status)}`}>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold ${getStatusColor(shop.status)}`}>
                       {getStatusIcon(shop.status)}
-                      <span className="ml-1">{shop.status}</span>
+                      <span>{shop.status}</span>
                     </span>
-                    <span className="text-xs text-gray-500">{shop.productsCount || 0} produits</span>
-                    <span className="text-xs text-gray-500">{shop.totalSales || 0} €</span>
+                    <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-medium">{shop.productsCount || 0} produits</span>
+                  </div>
+
+                  <div className="text-xs text-gray-600 space-y-1 mb-3">
+                    {shop.location && <div><span className="font-medium">Lieu:</span> {shop.location}</div>}
+                    <div><span className="font-medium">Ventes:</span> {shop.totalSales || 0}€</div>
                   </div>
 
                   {showActionMenu === shopId && (
@@ -478,11 +540,21 @@ export default function AdminShopsPage() {
                           </button>
                           {shop.status === 'PENDING_APPROVAL' && (
                             <>
-                              <button onClick={() => handleApprove(shopId)} className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left">
-                                <CheckCircle className="w-4 h-4 mr-2" />Approuver
+                              <button 
+                                onClick={() => handleApprove(shopId)}
+                                disabled={actionLoading !== null}
+                                className="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full text-left disabled:opacity-50"
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                {actionLoading === shopId ? 'Approbation...' : 'Approuver'}
                               </button>
-                              <button onClick={() => handleReject(shopId)} className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left">
-                                <XCircle className="w-4 h-4 mr-2" />Rejeter
+                              <button
+                                onClick={() => handleRejectClick(shopId)}
+                                disabled={actionLoading !== null}
+                                className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left disabled:opacity-50"
+                              >
+                                <XCircle className="w-4 h-4 mr-2" />
+                                {actionLoading === shopId ? 'Rejet...' : 'Rejeter'}
                               </button>
                             </>
                           )}
@@ -577,11 +649,19 @@ export default function AdminShopsPage() {
               </div>
               
               <div className="flex gap-2 justify-end mt-6">
-                <button onClick={() => setShowEditModal(false)} className="px-4 py-2 border rounded-md hover:bg-gray-50">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  disabled={actionLoading !== null}
+                  className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50"
+                >
                   Annuler
                 </button>
-                <button onClick={handleUpdateShop} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                  Mettre à jour
+                <button
+                  onClick={handleUpdateShop}
+                  disabled={actionLoading !== null}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {actionLoading ? 'Mise à jour...' : 'Mettre à jour'}
                 </button>
               </div>
             </div>
@@ -593,21 +673,74 @@ export default function AdminShopsPage() {
       {showDeleteConfirm && selectedShop && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={() => setShowDeleteConfirm(false)} />
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={() => !actionLoading && setShowDeleteConfirm(false)} />
             <div className="relative bg-white rounded-lg p-6 max-w-md w-full">
               <div className="flex items-center mb-4">
                 <AlertTriangle className="h-6 w-6 text-red-600 mr-2" />
                 <h3 className="text-lg font-medium">Supprimer la boutique</h3>
               </div>
               <p className="text-sm text-gray-500 mb-4">
-                Confirmer la suppression de <strong>{selectedShop.name}</strong> ?
+                Confirmer la suppression de <strong>{selectedShop.name}</strong> ? Cette action ne peut pas être annulée.
               </p>
               <div className="flex gap-2 justify-end">
-                <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 border rounded-md hover:bg-gray-50">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={actionLoading !== null}
+                  className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50"
+                >
                   Annuler
                 </button>
-                <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                  Supprimer
+                <button
+                  onClick={handleDelete}
+                  disabled={actionLoading !== null}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                >
+                  {actionLoading ? 'Suppression...' : 'Supprimer'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Modal */}
+      {showRejectModal && selectedShop && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={() => !actionLoading && setShowRejectModal(false)} />
+            <div className="relative bg-white rounded-lg p-6 max-w-md w-full">
+              <div className="flex items-center mb-4">
+                <XCircle className="h-6 w-6 text-red-600 mr-2" />
+                <h3 className="text-lg font-medium">Rejeter la boutique</h3>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">
+                Rejeter <strong>{selectedShop.name}</strong>. Veuillez indiquer une raison (facultatif).
+              </p>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Raison du rejet</label>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Ex: Documents invalides, description inadequate..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                  disabled={actionLoading !== null}
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => setShowRejectModal(false)}
+                  disabled={actionLoading !== null}
+                  className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleRejectSubmit}
+                  disabled={actionLoading !== null}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                >
+                  {actionLoading ? 'Rejet en cours...' : 'Rejeter'}
                 </button>
               </div>
             </div>
