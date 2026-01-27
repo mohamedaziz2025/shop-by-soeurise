@@ -294,10 +294,8 @@ export default function CreateProductPage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Sélectionner une catégorie</option>
-                <option value="mode">Mode</option>
-                <option value="cosmétiques">Cosmétiques</option>
-                <option value="électronique">Électronique</option>
-                <option value="maison">Maison</option>
+                <option value="Mode">Mode</option>
+                <option value="Cosmétiques">Cosmétiques</option>
               </select>
             </div>
 

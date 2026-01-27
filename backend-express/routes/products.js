@@ -43,6 +43,7 @@ router.get('/', async (req, res) => {
   try {
     const {
       shopId,
+      shopSlug,
       category,
       status = 'ACTIVE',
       search,
@@ -57,6 +58,13 @@ router.get('/', async (req, res) => {
     const query = { status };
 
     if (shopId) query.shopId = shopId;
+    if (shopSlug) {
+      // Find shop by slug and use its ID
+      const shop = await Shop.findOne({ slug: shopSlug });
+      if (shop) {
+        query.shopId = shop._id;
+      }
+    }
     if (category) query.category = category;
     if (isFeatured !== undefined) query.isFeatured = isFeatured === 'true';
     if (minPrice || maxPrice) {

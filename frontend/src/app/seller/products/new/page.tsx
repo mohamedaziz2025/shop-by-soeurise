@@ -15,6 +15,7 @@ export default function NewProductPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [myShop, setMyShop] = useState<any>(null);
   const [loadingShop, setLoadingShop] = useState(true);
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ export default function NewProductPage() {
     category: '',
     price: '',
     stock: '',
-    images: [] as string[],
+    images: [] as File[],
     variants: [] as any[],
     shippingInfo: {
       weight: '',
@@ -50,33 +51,28 @@ export default function NewProductPage() {
   }, [user]);
 
   const categories = [
-    'Mode & Vêtements',
-    'Accessoires',
-    'Beauté & Cosmétiques',
-    'Maison & Décoration',
-    'Bijoux',
-    'Artisanat',
-    'Livres & Éducation',
-    'Santé & Bien-être',
-    'Enfants & Bébés',
-    'Alimentaire',
+    'Mode',
+    'Cosmétiques',
   ];
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    // En production, télécharger vers un service de stockage
-    // Pour le moment, on simule avec des URLs locales
-    const newImages = Array.from(files).map((file) => URL.createObjectURL(file));
-    setImages([...images, ...newImages]);
-    setFormData({ ...formData, images: [...formData.images, ...newImages] });
+    const newFiles = Array.from(files);
+    const newImageUrls = newFiles.map((file) => URL.createObjectURL(file));
+    
+    setImages([...images, ...newImageUrls]);
+    setImageFiles([...imageFiles, ...newFiles]);
+    setFormData({ ...formData, images: [...formData.images, ...newFiles] });
   };
 
   const removeImage = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
+    const newImageFiles = imageFiles.filter((_, i) => i !== index);
     setImages(newImages);
-    setFormData({ ...formData, images: newImages });
+    setImageFiles(newImageFiles);
+    setFormData({ ...formData, images: newImageFiles });
   };
 
   const addVariant = () => {
@@ -121,7 +117,7 @@ export default function NewProductPage() {
       if (!formData.price || parseFloat(formData.price) <= 0) {
         throw new Error('Le prix doit être supérieur à 0');
       }
-      if (images.length === 0) {
+      if (imageFiles.length === 0) {
         throw new Error('Ajoutez au moins une image');
       }
 

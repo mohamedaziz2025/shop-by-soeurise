@@ -56,7 +56,7 @@ function MarketplacePageContent() {
   const fetchShops = async () => {
     setLoading(true);
     try {
-      const filters: any = { status: 'ACTIVE', category };
+      const filters: any = { status: 'ACTIVE,APPROVED', category };
       const data = await api.getShops(filters);
       setShops(data);
       setView('shops');

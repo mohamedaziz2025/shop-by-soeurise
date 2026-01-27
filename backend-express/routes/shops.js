@@ -41,7 +41,12 @@ router.get('/', async (req, res) => {
   try {
     const { status = 'ACTIVE', category, isFeatured } = req.query;
 
-    const query = { status };
+    let query: any = {};
+    if (status.includes(',')) {
+      query.status = { $in: status.split(',') };
+    } else {
+      query.status = status;
+    }
     if (category) query.categories = category;
     if (isFeatured !== undefined) query.isFeatured = isFeatured === 'true';
 
