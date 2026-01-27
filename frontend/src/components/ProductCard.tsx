@@ -44,6 +44,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCartStore();
   const [isAdding, setIsAdding] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -68,17 +69,37 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   };
 
+  const getImageUrl = () => {
+    if (!product.images || !product.images[0]) {
+      return '/placeholder-product.png';
+    }
+    const img = product.images[0];
+    // If already a full URL, return as is
+    if (img.startsWith('http')) {
+      return img;
+    }
+    // Otherwise prepend the server base URL
+    return `http://72.62.71.97:3001${img}`;
+  };
+
   return (
     <Link href={`/product/${product.slug}`} className="group">
       <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden hover:shadow-2xl transform hover:-translate-y-1 transition-all">
         {/* Image */}
         <div className="relative aspect-square bg-gray-100">
-          <Image
-            src={product.images[0] || '/placeholder-product.png'}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          {!imageError ? (
+            <Image
+              src={getImageUrl()}
+              alt={product.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
+              <span>📦</span>
+            </div>
+          )}
         </div>
 
         {/* Contenu */}

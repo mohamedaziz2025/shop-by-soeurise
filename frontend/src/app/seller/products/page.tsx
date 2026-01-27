@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
-import Image from 'next/image';
+import Link from 'next/link';
 
 export default function SellerProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -128,14 +128,23 @@ export default function SellerProductsPage() {
                     <tr key={product._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="relative w-12 h-12 bg-gray-100 rounded flex-shrink-0">
-                            {product.images?.[0] && (
-                              <Image
-                                src={product.images[0]}
+                          <div className="relative w-12 h-12 bg-gray-100 rounded flex-shrink-0 overflow-hidden flex items-center justify-center">
+                            {product.images?.[0] || product.image ? (
+                              <img
+                                src={
+                                  (product.images?.[0] || product.image).startsWith('http')
+                                    ? product.images?.[0] || product.image
+                                    : `http://72.62.71.97:3001${product.images?.[0] || product.image}`
+                                }
                                 alt={product.name}
-                                fill
-                                className="object-cover rounded"
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src =
+                                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect fill="%23e5e7eb" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-size="12"%3E📦%3C/text%3E%3C/svg%3E';
+                                }}
                               />
+                            ) : (
+                              <span className="text-gray-400 text-lg">📦</span>
                             )}
                           </div>
                           <div>
@@ -185,7 +194,7 @@ export default function SellerProductsPage() {
                             )}
                           </button>
                           <a
-                            href={`/seller/products/edit/${product._id}`}
+                            href={`/seller/products/${product._id}/edit`}
                             className="p-2 hover:bg-gray-100 rounded"
                             title="Modifier"
                           >
