@@ -95,6 +95,39 @@ async function bootstrap() {
   
   app.useStaticAssets(uploadDir, { prefix: '/uploads' });
 
+  // Default logo handler for missing files
+  app.use('/uploads/logos/:filename', (req, res) => {
+    const filePath = join(logosDir, req.params.filename);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      // Serve default SVG logo
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      
+      const defaultSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+          <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <rect width="200" height="200" fill="url(#grad1)"/>
+          <circle cx="100" cy="70" r="40" fill="white" opacity="0.2"/>
+          <rect x="70" y="110" width="60" height="50" rx="5" fill="white" opacity="0.3"/>
+          <text x="100" y="145" font-size="20" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">Logo</text>
+        </svg>
+      `.trim();
+      
+      res.send(defaultSvg);
+    } else {
+      // File exists, let Express serve it
+      res.sendFile(filePath);
+    }
+  });
+
   // Validation globale
   app.useGlobalPipes(
     new ValidationPipe({

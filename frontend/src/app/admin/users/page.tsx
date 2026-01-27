@@ -157,6 +157,23 @@ export default function AdminUsersPage() {
   return (
     <AdminLayout title="Gestion des utilisateurs" subtitle="Gérer les comptes utilisateurs">
       <div className="space-y-4 sm:space-y-6">
+        {/* Header with Add User button */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+              {filteredUsers.length} utilisateur{filteredUsers.length !== 1 ? 's' : ''}
+            </h2>
+            <p className="text-sm text-gray-600">Gérez et modifiez tous les utilisateurs de la plateforme</p>
+          </div>
+          <a
+            href="/admin/users/new"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
+          >
+            <User className="w-4 h-4" />
+            Ajouter un utilisateur
+          </a>
+        </div>
+
         {/* Filters */}
         <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex flex-col lg:flex-row gap-4">

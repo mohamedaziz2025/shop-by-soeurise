@@ -206,6 +206,58 @@ export default function AdminDashboardPage() {
 
         {/* Recent Orders and Top Products */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Pending Approvals - Shops & Products */}
+          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-yellow-600" />
+                <h3 className="text-lg font-medium text-gray-900">Approbations en attente</h3>
+              </div>
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-medium">
+                {stats?.pendingApprovals || 0} en attente
+              </span>
+            </div>
+            <div className="px-6 py-4 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Pending Shops */}
+                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Store className="w-5 h-5 text-blue-600" />
+                      <h4 className="font-semibold text-gray-900">Boutiques en attente</h4>
+                    </div>
+                    <span className="text-2xl font-bold text-blue-600">0</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Nouvelles demandes de création de boutique</p>
+                  <a
+                    href="/admin/shops/pending"
+                    className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    Voir les demandes →
+                  </a>
+                </div>
+
+                {/* Pending Products */}
+                <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Package className="w-5 h-5 text-purple-600" />
+                      <h4 className="font-semibold text-gray-900">Produits en attente</h4>
+                    </div>
+                    <span className="text-2xl font-bold text-purple-600">0</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Nouveaux produits à vérifier</p>
+                  <a
+                    href="/admin/products/pending"
+                    className="inline-flex items-center gap-1 text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  >
+                    Voir les produits →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Recent Orders */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
