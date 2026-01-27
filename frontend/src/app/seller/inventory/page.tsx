@@ -46,7 +46,6 @@ export default function SellerInventoryPage() {
 
   return (
     <SellerLayout activeTab="inventory" onSearch={handleSearch} title="Gestion du stock" subtitle="Suivez et gérez votre inventaire">
-      {/* Low Stock Alert */}
       {lowStockProducts.length > 0 && (
         <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
@@ -59,7 +58,6 @@ export default function SellerInventoryPage() {
         </div>
       )}
 
-      {/* Products Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200/50">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
