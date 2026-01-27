@@ -343,11 +343,6 @@ class ApiClient {
   }
 
   // Admin
-  async getAdminStats() {
-    const { data } = await this.client.get('/admin/dashboard/stats');
-    return data;
-  }
-
   async getDashboardStats() {
     const { data } = await this.client.get('/admin/dashboard/stats');
     return data;
@@ -649,12 +644,6 @@ class ApiClient {
 
   async deleteOrderAdmin(orderId: string) {
     const { data } = await this.client.delete(`/admin/orders/${orderId}`);
-    return data;
-  }
-
-  // Admin - Dashboard
-  async getDashboardStats() {
-    const { data } = await this.client.get('/admin/dashboard/stats');
     return data;
   }
 
