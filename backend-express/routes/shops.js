@@ -47,6 +47,7 @@ router.get('/', async (req, res) => {
 
     const shops = await Shop.find(query)
       .populate('sellerId', 'firstName lastName')
+      .select('name slug description logo status categories averageRating totalReviews totalProducts isFeatured sellerId')
       .sort({ isFeatured: -1, averageRating: -1, createdAt: -1 });
 
     res.json(shops);

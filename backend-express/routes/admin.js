@@ -597,6 +597,11 @@ router.get('/orders', auth, rbac(['ADMIN']), async (req, res) => {
       currentPage: page,
       total,
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Create shop for user (Admin only)
 router.post('/shops', auth, rbac(['ADMIN']), upload.single('logo'), async (req, res) => {
   try {
