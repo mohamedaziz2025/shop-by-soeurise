@@ -61,10 +61,39 @@ async function bootstrap() {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+    optionsSuccessStatus: 200,
+    preflightContinue: true,
   });
 
   // Global prefix
   app.setGlobalPrefix(apiPrefix);
+
+  // Static assets for uploads with CORS headers
+  const uploadDir = join(process.cwd(), 'uploads');
+  const logosDir = join(uploadDir, 'logos');
+  try {
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    if (!fs.existsSync(logosDir)) fs.mkdirSync(logosDir, { recursive: true });
+  } catch (e) {
+    logger.error(`Error creating upload directories: ${e}`);
+  }
+  
+  // Serve static assets with proper CORS headers
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/uploads')) {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+    }
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+    } else {
+      next();
+    }
+  });
+  
+  app.useStaticAssets(uploadDir, { prefix: '/uploads' });
 
   // Validation globale
   app.useGlobalPipes(
@@ -77,17 +106,6 @@ async function bootstrap() {
       },
     }),
   );
-
-  // Static assets for uploads
-  const uploadDir = join(process.cwd(), 'uploads');
-  const logosDir = join(uploadDir, 'logos');
-  try {
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    if (!fs.existsSync(logosDir)) fs.mkdirSync(logosDir, { recursive: true });
-  } catch (e) {
-    logger.error(`Error creating upload directories: ${e}`);
-  }
-  app.useStaticAssets(uploadDir, { prefix: '/uploads' });
 
   await app.listen(port);
   logger.log(`✓ Soeurise API running on: http://72.62.71.97:${port}/${apiPrefix}`);
