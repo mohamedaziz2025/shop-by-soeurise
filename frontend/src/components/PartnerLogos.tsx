@@ -4,34 +4,40 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
 
-interface Partner {
+interface Shop {
   _id: string;
+  id?: string;
   name: string;
   slug: string;
-  logo: string;
-  categories: string[];
+  logo?: string;
+  category?: string;
+  status?: string;
 }
 
 export default function PartnerLogos() {
-  const [partners, setPartners] = useState<Partner[]>([]);
+  const [shops, setShops] = useState<Shop[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchPartners();
+    fetchShops();
   }, []);
 
-  const fetchPartners = async () => {
+  const fetchShops = async () => {
     try {
-      const data = await api.getPartners();
-      setPartners(data || []);
+      const data = await api.getShops({ status: 'APPROVED', limit: 100 });
+      // Filtrer pour ne montrer que les boutiques approuvées
+      const approvedShops = (data?.data || data || []).filter(
+        (shop: any) => shop.status === 'APPROVED' || !shop.status
+      );
+      setShops(approvedShops || []);
     } catch (error) {
-      console.error('Erreur chargement partenaires:', error);
+      console.error('Erreur chargement boutiques:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading || partners.length === 0) return null;
+  if (loading || shops.length === 0) return null;
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://72.62.71.97:3001';
 
@@ -39,38 +45,45 @@ export default function PartnerLogos() {
     <section className="py-16 bg-white border-y border-pink-50 overflow-hidden">
       <div className="container mx-auto px-6 mb-8">
         <h2 className="text-center text-sm font-bold uppercase tracking-widest text-gray-400 mb-2">
-          Nos Partenaires
+          Nos Boutiques
         </h2>
         <p className="text-center text-2xl font-black text-gray-900">
-          Ils nous font confiance
+          Découvrez nos vendeurs
         </p>
       </div>
 
-      {/* Marquee avec partenaires - Responsive */}
+      {/* Marquee avec boutiques - Responsive */}
       {/* Desktop: Marquee Animation */}
       <div className="hidden md:block marquee-container relative">
         <div className="marquee-content flex gap-12 items-center">
-          {[...partners, ...partners].map((partner, i) => (
+          {[...shops, ...shops].map((shop, i) => (
             <motion.a
-              key={`${partner._id}-${i}`}
-              href={`/shops/${partner.slug}`}
+              key={`${shop._id}-${i}`}
+              href={`/shops/${shop.slug}`}
               className="flex-shrink-0 group"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >
               <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-100 flex items-center justify-center p-4 group-hover:border-pink-300 transition-all shadow-sm group-hover:shadow-md">
-                <img
-                  src={partner.logo?.startsWith('http') ? partner.logo : `${API_BASE}${partner.logo}`}
-                  alt={partner.name}
-                  className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.parentElement!.innerHTML = `<span className="text-2xl font-bold text-gray-400">${partner.name.charAt(0)}</span>`;
-                  }}
-                />
+                {shop.logo ? (
+                  <img
+                    src={shop.logo?.startsWith('http') ? shop.logo : `${API_BASE}${shop.logo}`}
+                    alt={shop.name}
+                    className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const span = document.createElement('span');
+                      span.className = 'text-2xl font-bold text-gray-400';
+                      span.textContent = shop.name.charAt(0);
+                      e.currentTarget.parentElement?.appendChild(span);
+                    }}
+                  />
+                ) : (
+                  <span className="text-2xl font-bold text-gray-400">{shop.name.charAt(0).toUpperCase()}</span>
+                )}
               </div>
               <p className="text-center text-xs font-bold text-gray-600 mt-2 group-hover:text-pink-600 transition-colors">
-                {partner.name}
+                {shop.name}
               </p>
             </motion.a>
           ))}
@@ -80,30 +93,34 @@ export default function PartnerLogos() {
       {/* Mobile & Tablet: Grid Layout */}
       <div className="md:hidden px-4 sm:px-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {partners.map((partner) => (
+          {shops.map((shop) => (
             <motion.a
-              key={partner._id}
-              href={`/shops/${partner.slug}`}
+              key={shop._id}
+              href={`/shops/${shop.slug}`}
               className="group flex flex-col items-center"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-100 flex items-center justify-center p-3 group-hover:border-pink-300 transition-all shadow-sm group-hover:shadow-md">
-                <img
-                  src={partner.logo?.startsWith('http') ? partner.logo : `${API_BASE}${partner.logo}`}
-                  alt={partner.name}
-                  className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    const span = document.createElement('span');
-                    span.className = 'text-lg sm:text-2xl font-bold text-gray-400';
-                    span.textContent = partner.name.charAt(0);
-                    e.currentTarget.parentElement?.appendChild(span);
-                  }}
-                />
+                {shop.logo ? (
+                  <img
+                    src={shop.logo?.startsWith('http') ? shop.logo : `${API_BASE}${shop.logo}`}
+                    alt={shop.name}
+                    className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const span = document.createElement('span');
+                      span.className = 'text-lg sm:text-2xl font-bold text-gray-400';
+                      span.textContent = shop.name.charAt(0).toUpperCase();
+                      e.currentTarget.parentElement?.appendChild(span);
+                    }}
+                  />
+                ) : (
+                  <span className="text-lg sm:text-2xl font-bold text-gray-400">{shop.name.charAt(0).toUpperCase()}</span>
+                )}
               </div>
               <p className="text-center text-xs font-bold text-gray-600 mt-2 group-hover:text-pink-600 transition-colors leading-tight line-clamp-2">
-                {partner.name}
+                {shop.name}
               </p>
             </motion.a>
           ))}

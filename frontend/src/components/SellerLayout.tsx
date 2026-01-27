@@ -65,11 +65,14 @@ export default function SellerLayout({
       <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <img src="/logo-soeurise/logo-main.svg" alt="Soeurise" className="h-8" />
-            <div className="h-6 w-px bg-gray-300/30" />
-            <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-500 bg-clip-text text-transparent">
-              Seller CRM
-            </h1>
+            <Link href="/" className="flex items-center gap-2 hover:opacity-75 transition-opacity">
+              <div className="w-8 h-8 bg-gradient-to-tr from-pink-600 to-rose-500 rounded-lg flex items-center justify-center">
+                <span className="text-sm font-black text-white">S</span>
+              </div>
+              <h1 className="text-xl font-black bg-gradient-to-r from-pink-600 to-rose-500 bg-clip-text text-transparent">
+                SHOP BY SOEURISE
+              </h1>
+            </Link>
           </div>
 
           <div className="flex items-center gap-3 md:gap-4">
