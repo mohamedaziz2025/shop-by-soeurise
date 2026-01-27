@@ -522,11 +522,6 @@ class ApiClient {
   }
 
   // Admin - Products CRUD
-  async getAllProducts(filters?: any) {
-    const { data } = await this.client.get('/admin/products', { params: filters });
-    return data;
-  }
-
   async getProductById(productId: string) {
     const { data } = await this.client.get(`/admin/products/${productId}`);
     return data;
