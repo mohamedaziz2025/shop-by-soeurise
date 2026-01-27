@@ -46,8 +46,9 @@ export default function PartnerLogos() {
         </p>
       </div>
 
-      {/* Marquee avec partenaires */}
-      <div className="marquee-container relative">
+      {/* Marquee avec partenaires - Responsive */}
+      {/* Desktop: Marquee Animation */}
+      <div className="hidden md:block marquee-container relative">
         <div className="marquee-content flex gap-12 items-center">
           {[...partners, ...partners].map((partner, i) => (
             <motion.a
@@ -59,12 +60,49 @@ export default function PartnerLogos() {
             >
               <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-100 flex items-center justify-center p-4 group-hover:border-pink-300 transition-all shadow-sm group-hover:shadow-md">
                 <img
-                  src={partner.logo.startsWith('http') ? partner.logo : `${API_BASE}${partner.logo}`}
+                  src={partner.logo?.startsWith('http') ? partner.logo : `${API_BASE}${partner.logo}`}
                   alt={partner.name}
                   className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement!.innerHTML = `<span className="text-2xl font-bold text-gray-400">${partner.name.charAt(0)}</span>`;
+                  }}
                 />
               </div>
               <p className="text-center text-xs font-bold text-gray-600 mt-2 group-hover:text-pink-600 transition-colors">
+                {partner.name}
+              </p>
+            </motion.a>
+          ))}
+        </div>
+      </div>
+
+      {/* Mobile & Tablet: Grid Layout */}
+      <div className="md:hidden px-4 sm:px-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {partners.map((partner) => (
+            <motion.a
+              key={partner._id}
+              href={`/shops/${partner.slug}`}
+              className="group flex flex-col items-center"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-100 flex items-center justify-center p-3 group-hover:border-pink-300 transition-all shadow-sm group-hover:shadow-md">
+                <img
+                  src={partner.logo?.startsWith('http') ? partner.logo : `${API_BASE}${partner.logo}`}
+                  alt={partner.name}
+                  className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const span = document.createElement('span');
+                    span.className = 'text-lg sm:text-2xl font-bold text-gray-400';
+                    span.textContent = partner.name.charAt(0);
+                    e.currentTarget.parentElement?.appendChild(span);
+                  }}
+                />
+              </div>
+              <p className="text-center text-xs font-bold text-gray-600 mt-2 group-hover:text-pink-600 transition-colors leading-tight line-clamp-2">
                 {partner.name}
               </p>
             </motion.a>
@@ -78,8 +116,12 @@ export default function PartnerLogos() {
           overflow: hidden;
         }
         .marquee-content {
-          animation: marquee 40s linear infinite;
+          animation: marquee 50s linear infinite;
           white-space: nowrap;
+          padding-right: 48px;
+        }
+        .marquee-content:hover {
+          animation-play-state: paused;
         }
         @keyframes marquee {
           0% {

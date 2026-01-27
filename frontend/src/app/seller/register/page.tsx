@@ -20,6 +20,7 @@ export default function SellerRegisterPage() {
     name: '',
     description: '',
     category: '',
+    shippingPrice: '',
     phone: '',
     address: '',
     city: '',
@@ -433,6 +434,25 @@ export default function SellerRegisterPage() {
                     required
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Prix de livraison par commande (€) *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={shopData.shippingPrice}
+                  onChange={(e) => setShopData({ ...shopData, shippingPrice: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  placeholder="Ex: 5.99"
+                  required
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Montant appliqué à chaque commande pour la livraison
+                </p>
               </div>
 
               <div className="flex gap-4">

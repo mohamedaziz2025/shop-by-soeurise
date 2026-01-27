@@ -120,25 +120,27 @@ function MarketplacePageContent() {
 
   return (
     <ModernLayout>
-      <div className="min-h-screen bg-slate-50">
-        <div className="flex flex-col lg:flex-row">
-          {/* Sidebar with categories and shops */}
-          <MarketplaceSidebar
-            categories={categories}
-            selectedCategory={category}
-            shops={shops}
-            selectedShop={selectedShop}
-            onCategorySelect={(cat) => {
-              setCategory(cat);
-              setSelectedShop(null);
-              setView('shops');
-            }}
-            onShopSelect={handleShopClick}
-            accentColor={accentColor}
-          />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-blue-50/30">
+        <div className="flex flex-col lg:flex-row gap-0">
+          {/* Sidebar with categories and shops - Hidden on mobile, shown on lg */}
+          <div className="hidden lg:block lg:w-64 lg:flex-shrink-0">
+            <MarketplaceSidebar
+              categories={categories}
+              selectedCategory={category}
+              shops={shops}
+              selectedShop={selectedShop}
+              onCategorySelect={(cat) => {
+                setCategory(cat);
+                setSelectedShop(null);
+                setView('shops');
+              }}
+              onShopSelect={handleShopClick}
+              accentColor={accentColor}
+            />
+          </div>
 
-          {/* Main Content */}
-          <main className="flex-1">
+          {/* Main Content - Full width on mobile */}
+          <main className="flex-1 w-full">
             {/* Header Sticky: Breadcrumb + Search */}
             <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
               <div className="px-4 sm:px-6 lg:px-8 py-4">

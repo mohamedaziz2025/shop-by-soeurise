@@ -284,26 +284,26 @@ export default function SellerDashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <MetricCard
               title="Taux de conversion"
-              value="4.2%"
-              change={15.8}
+              value={`${(stats?.conversionRate || 0).toFixed(1)}%`}
+              change={stats?.conversionRateTrend || 0}
               icon={<TrendingUp className="w-5 h-5" />}
             />
             <MetricCard
               title="Visiteurs uniques"
-              value="1,234"
-              change={22.5}
+              value={`${stats?.uniqueVisitors?.toLocaleString('fr-FR') || 0}`}
+              change={stats?.visitorsTrend || 0}
               icon={<Eye className="w-5 h-5" />}
             />
             <MetricCard
               title="Panier moyen"
-              value={formatPrice(58.90)}
-              change={7.3}
+              value={formatPrice(stats?.averageCartValue || 0)}
+              change={stats?.cartValueTrend || 0}
               icon={<ShoppingBag className="w-5 h-5" />}
             />
             <MetricCard
               title="Clients récurrents"
-              value="38%"
-              change={-3.2}
+              value={`${stats?.returningCustomersPercentage || 0}%`}
+              change={stats?.returningCustomersTrend || 0}
               icon={<Users className="w-5 h-5" />}
             />
           </div>

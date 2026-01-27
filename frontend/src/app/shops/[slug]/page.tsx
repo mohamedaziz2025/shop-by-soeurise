@@ -8,7 +8,6 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import MarketplaceSidebar from '@/components/MarketplaceSidebar';
 import { Star, Package, MapPin, Truck, SlidersHorizontal, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 
 export default function ShopDetailPage() {
   const params = useParams();
@@ -234,17 +233,22 @@ export default function ShopDetailPage() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-start gap-6">
             {/* Logo */}
-            <div className="relative w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-[2.5rem] flex-shrink-0 border-2 border-gray-100 overflow-hidden">
+            <div className="relative w-32 h-32 bg-gradient-to-br from-pink-50 to-orange-50 rounded-[2.5rem] flex-shrink-0 border-2 border-gray-100 overflow-hidden flex items-center justify-center group hover:shadow-lg transition-shadow">
               {shop.logo ? (
-                <Image
-                  src={shop.logo.startsWith('http') ? shop.logo : `${API_BASE}${shop.logo}`}
+                <img
+                  src={shop.logo?.startsWith('http') ? shop.logo : `${API_BASE}${shop.logo}`}
                   alt={shop.name}
-                  fill
-                  className="object-cover p-3"
+                  className="object-contain w-full h-full p-3 group-hover:scale-110 transition-transform"
+                  onError={(e) => {
+                    const container = e.currentTarget.parentElement;
+                    if (container) {
+                      container.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-pink-200 to-rose-200 rounded-[2.5rem] flex items-center justify-center text-4xl font-black text-pink-700">${shop.name.charAt(0)}</div>`;
+                    }
+                  }}
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-4xl font-black text-gray-400">
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-200 to-rose-200">
+                  <span className="text-4xl font-black text-pink-700">
                     {shop.name.charAt(0)}
                   </span>
                 </div>

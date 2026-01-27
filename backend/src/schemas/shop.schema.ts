@@ -36,7 +36,11 @@ export class Shop {
   @Prop([String])
   categories: string[];
 
-  // Configuration livraison
+  // Prix de livraison par boutique (obligatoire)
+  @Prop({ required: true, type: Number, min: 0 })
+  shippingPrice: number;
+
+  // Configuration livraison avancée
   @Prop({
     type: {
       enabled: { type: Boolean, default: true },

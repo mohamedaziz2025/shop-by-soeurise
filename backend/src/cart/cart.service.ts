@@ -274,7 +274,9 @@ export class CartService {
     const shopCarts = Array.from(itemsByShop.values());
 
     for (const shopCart of shopCarts) {
-      const shippingConfig = (shopCart.shop as any).shippingConfig;
+      const shop = shopCart.shop as any;
+      const shippingPrice = shop.shippingPrice || 0;
+      const shippingConfig = shop.shippingConfig;
 
       if (shippingConfig?.enabled) {
         // Livraison gratuite si seuil atteint
@@ -283,8 +285,10 @@ export class CartService {
           shopCart.subtotal >= shippingConfig.freeShippingThreshold
         ) {
           shopCart.shipping = 0;
-        } else if (shippingConfig.flatRate) {
-          shopCart.shipping = shippingConfig.flatRate;
+        } else {
+          // Utiliser d'abord shippingPrice (nouveau champ obligatoire)
+          // En fallback, utiliser flatRate de la config avancée
+          shopCart.shipping = shippingPrice || shippingConfig.flatRate || 0;
         }
 
         // Appliquer le plafond si défini
@@ -294,6 +298,9 @@ export class CartService {
         ) {
           shopCart.shipping = shippingConfig.maxShippingCost;
         }
+      } else {
+        // Si livraison désactivée, utiliser le prix configuré
+        shopCart.shipping = shippingPrice;
       }
 
       shopCart.total = shopCart.subtotal + shopCart.shipping;

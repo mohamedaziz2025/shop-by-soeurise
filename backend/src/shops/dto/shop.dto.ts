@@ -58,6 +58,10 @@ export class CreateShopDto {
   @IsNotEmpty()
   description: string;
 
+  @IsNumber()
+  @IsNotEmpty()
+  shippingPrice: number;
+
   @IsString()
   @IsOptional()
   logo?: string;
@@ -97,6 +101,10 @@ export class UpdateShopDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsNumber()
+  @IsOptional()
+  shippingPrice?: number;
 
   @IsString()
   @IsOptional()

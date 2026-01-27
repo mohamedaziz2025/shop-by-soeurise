@@ -36,6 +36,7 @@ export default function SellerSettingsPage() {
     postalCode: '',
     country: 'France',
     phone: '',
+    shippingPrice: 0,
     returnPolicy: '',
     shippingPolicy: '',
   });
@@ -73,6 +74,7 @@ export default function SellerSettingsPage() {
           postalCode: shop.postalCode || '',
           country: shop.country || 'France',
           phone: shop.phone || '',
+          shippingPrice: shop.shippingPrice || 0,
           returnPolicy: shop.returnPolicy || '',
           shippingPolicy: shop.shippingPolicy || '',
         });
@@ -437,6 +439,24 @@ export default function SellerSettingsPage() {
                     onChange={(e) => setShopData({ ...shopData, phone: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Prix de livraison par commande (€) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={shopData.shippingPrice}
+                    onChange={(e) => setShopData({ ...shopData, shippingPrice: parseFloat(e.target.value) })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    required
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Montant appliqué à chaque commande pour la livraison
+                  </p>
                 </div>
 
                 <div>
