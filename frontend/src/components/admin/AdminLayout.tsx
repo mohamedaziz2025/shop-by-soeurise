@@ -40,29 +40,29 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-blue-50/30">
       {/* Sidebar */}
       <AdminSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+        <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200/50 shadow-sm">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center">
+            <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
                 aria-label="Ouvrir le menu admin"
                 aria-expanded={sidebarOpen}
-                className="p-2 text-gray-400 rounded-md hover:text-gray-500 hover:bg-gray-100 lg:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2"
+                className="p-2 text-gray-400 rounded-lg hover:text-gray-600 hover:bg-gray-100/50 lg:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 transition-all duration-200"
               >
                 <Menu className="w-6 h-6" />
               </button>
 
               <div className="ml-4 lg:ml-0">
-                <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">{title}</h1>
                 {subtitle && (
-                  <p className="text-sm text-gray-600">{subtitle}</p>
+                  <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
                 )}
               </div>
             </div>
@@ -76,13 +76,14 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                 <input
                   type="text"
                   placeholder="Rechercher..."
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-pink-500 focus:border-pink-500 sm:text-sm"
+                  className="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg leading-5 bg-white/50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 sm:text-sm transition-all duration-200 hover:bg-white"
                 />
               </div>
 
               {/* Notifications */}
-              <button aria-label="Notifications" className="p-2 text-gray-400 rounded-md hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2">
+              <button aria-label="Notifications" className="p-2.5 text-gray-400 rounded-lg hover:text-gray-600 hover:bg-gray-100/50 transition-all duration-200 relative group">
                 <Bell className="w-6 h-6" />
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
             </div>
           </div>
