@@ -90,7 +90,7 @@ export default function EditShopPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <AdminLayout title="Modifier la boutique">
         <div className="flex justify-center items-center h-64">
           <LoadingSpinner size="lg" />
         </div>
@@ -100,7 +100,7 @@ export default function EditShopPage() {
 
   if (!shop) {
     return (
-      <AdminLayout>
+      <AdminLayout title="Modifier la boutique">
         <div className="text-center py-12">
           <p className="text-gray-500">Boutique non trouvée</p>
           <button
@@ -115,7 +115,7 @@ export default function EditShopPage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Modifier la boutique" subtitle={shop?.name}>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
