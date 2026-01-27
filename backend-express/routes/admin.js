@@ -808,7 +808,7 @@ router.get('/products', auth, rbac(['ADMIN']), async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
 
-    const query: any = {};
+    const query = {};
 
     if (status && status !== 'all') query.status = status;
     if (category && category !== 'all') query.category = category;
@@ -820,7 +820,7 @@ router.get('/products', auth, rbac(['ADMIN']), async (req, res) => {
       ];
     }
 
-    const sortOptions: any = {};
+    const sortOptions = {};
     sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
     const products = await Product.find(query)
