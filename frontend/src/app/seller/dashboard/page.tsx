@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { api } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import SellerLayout from '@/components/SellerLayout';
 import { StatCard, SimpleBarChart, DataTable, StatusBadge, MetricCard } from '@/components/CRMComponents';
 import { 
   BarChart3, Package, ShoppingBag, TrendingUp, Euro, Users, 
-  Star, Eye, Settings, LogOut, Bell, Search, Download, 
-  ArrowUpRight, Clock, CheckCircle, XCircle, AlertTriangle, Menu, X
+  Star, Eye, Download, ArrowUpRight, Clock, CheckCircle, XCircle, AlertTriangle
 } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/utils';
 import Link from 'next/link';
@@ -105,167 +105,33 @@ export default function SellerDashboardPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-blue-50/30">
-      {/* Top Navigation Bar */}
-      <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <img src="/logo-soeurise/logo-main.svg" alt="Soeurise" className="h-8" />
-            <div className="h-6 w-px bg-gray-300/30" />
-            <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-500 bg-clip-text text-transparent">Seller CRM</h1>
+    <SellerLayout activeTab="dashboard" title="Dashboard" subtitle="Vue d'ensemble de votre boutique">
+      <div className="space-y-8">
+        {/* Header with Time Range */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Vue d'ensemble</h2>
+            <p className="text-gray-600 mt-1 text-sm">Tableau de bord de votre boutique</p>
           </div>
           
-          <div className="flex items-center gap-3 md:gap-4">
-            {/* Search Bar */}
-            <div className="relative hidden md:block">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="search"
-                placeholder="Rechercher..."
-                className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 w-64 transition-all"
-              />
-            </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all"
+            >
+              <option value="7d">7 derniers jours</option>
+              <option value="30d">30 derniers jours</option>
+              <option value="90d">90 derniers jours</option>
+              <option value="1y">1 an</option>
+            </select>
             
-            {/* Notifications */}
-            <button className="relative p-2.5 hover:bg-gray-100/50 rounded-lg transition-colors group">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+            <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-600 to-rose-500 text-white rounded-lg hover:shadow-lg hover:shadow-pink-500/30 transition-all font-semibold">
+              <Download className="w-4 h-4" />
+              Exporter
             </button>
-            
-            {/* User Menu */}
-            <div className="flex items-center gap-3 pl-4 border-l border-gray-200/50">
-              <div className="text-right hidden sm:block">
-                <div className="text-sm font-semibold text-gray-900">{user.firstName}</div>
-                <div className="text-xs text-gray-500">Vendeuse</div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-2.5 hover:bg-red-50 rounded-lg text-gray-600 hover:text-red-600 transition-all"
-                title="Déconnexion"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
-            </div>
           </div>
         </div>
-      </header>
-
-      <div className="flex">
-        {/* Mobile sidebar toggle */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden fixed bottom-6 right-6 z-40 p-3 bg-gradient-to-r from-pink-600 to-rose-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-110"
-          title="Ouvrir le menu"
-        >
-          {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-
-        {/* Mobile overlay */}
-        {sidebarOpen && (
-          <div
-            className="lg:hidden fixed inset-0 z-30 bg-black bg-opacity-50 transition-opacity"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        {/* Sidebar */}
-        <aside className={`fixed lg:static lg:block inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200/50 min-h-screen sticky top-16 shadow-lg lg:shadow-sm transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}>
-          <nav className="p-4 space-y-1">
-            <Link
-              href="/seller/dashboard"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-pink-50 to-pink-0 text-pink-600 rounded-xl font-semibold transition-all group"
-            >
-              <div className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-pink-600 to-rose-500 text-white rounded-lg group-hover:shadow-lg transition-all">
-                <BarChart3 className="w-4 h-4" />
-              </div>
-              Dashboard
-            </Link>
-            <Link
-              href="/seller/products"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-gray-700 transition-all group"
-            >
-              <div className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg group-hover:bg-gray-200 transition-all">
-                <Package className="w-4 h-4" />
-              </div>
-              Produits
-            </Link>
-            <Link
-              href="/seller/orders"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-gray-700 transition-all group"
-            >
-              <div className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg group-hover:bg-gray-200 transition-all">
-                <ShoppingBag className="w-4 h-4" />
-              </div>
-              Commandes
-            </Link>
-            <Link
-              href="/seller/customers"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-gray-700 transition-all group"
-            >
-              <div className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg group-hover:bg-gray-200 transition-all">
-                <Users className="w-4 h-4" />
-              </div>
-              Clients
-            </Link>
-            <Link
-              href="/seller/analytics"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-gray-700 transition-all group"
-            >
-              <div className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg group-hover:bg-gray-200 transition-all">
-                <TrendingUp className="w-4 h-4" />
-              </div>
-              Analytics
-            </Link>
-            
-            <div className="pt-4 mt-4 border-t border-gray-200/50">
-              <Link
-                href="/seller/settings"
-                onClick={() => setSidebarOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl text-gray-700 transition-all group"
-              >
-                <div className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg group-hover:bg-gray-200 transition-all">
-                  <Settings className="w-4 h-4" />
-                </div>
-                Paramètres
-              </Link>
-            </div>
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 p-4 md:p-8">
-          {/* Header with Time Range */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-            <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Vue d'ensemble</h2>
-              <p className="text-gray-600 mt-1 text-sm">Tableau de bord de votre boutique</p>
-            </div>
-            
-            <div className="flex items-center gap-3 flex-wrap">
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value)}
-                className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all"
-              >
-                <option value="7d">7 derniers jours</option>
-                <option value="30d">30 derniers jours</option>
-                <option value="90d">90 derniers jours</option>
-                <option value="1y">1 an</option>
-              </select>
-              
-              <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-600 to-rose-500 text-white rounded-lg hover:shadow-lg hover:shadow-pink-500/30 transition-all font-semibold">
-                <Download className="w-4 h-4" />
-                Exporter
-              </button>
-            </div>
-          </div>
 
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -544,8 +410,8 @@ export default function SellerDashboardPage() {
               </Link>
             </div>
           </div>
-        </main>
+        </div>
       </div>
-    </div>
+    </SellerLayout>
   );
 }

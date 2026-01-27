@@ -19,11 +19,21 @@ interface ProductCardProps {
       _id: string;
       name: string;
       slug: string;
+      shippingConfig?: {
+        flatRate?: number;
+        freeShippingThreshold?: number;
+        estimatedDays?: number;
+      };
     };
     shopId?: {
       _id: string;
       name: string;
       slug: string;
+      shippingConfig?: {
+        flatRate?: number;
+        freeShippingThreshold?: number;
+        estimatedDays?: number;
+      };
     };
     averageRating?: number;
     totalReviews?: number;
@@ -111,8 +121,38 @@ export default function ProductCard({ product }: ProductCardProps) {
               )}
             </button>
           </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
+
+          {/* Informations de livraison */}
+          {(product.shop?.shippingConfig || product.shopId?.shippingConfig) && (
+            <div className="mt-2 text-xs text-gray-600">
+              {(() => {
+                const shippingConfig = product.shop?.shippingConfig || product.shopId?.shippingConfig;
+                const freeThreshold = shippingConfig?.freeShippingThreshold;
+                const flatRate = shippingConfig?.flatRate;
+                const estimatedDays = shippingConfig?.estimatedDays || 3;
+
+                if (freeThreshold && product.price >= freeThreshold) {
+                  return (
+                    <div className="flex items-center gap-1">
+                      <span className="text-green-600 font-medium">Livraison gratuite</span>
+                      <span>• {estimatedDays} jours</span>
+                    </div>
+                  );
+                } else if (flatRate) {
+                  return (
+                    <div className="flex items-center gap-1">
+                      <span>Livraison {formatPrice(flatRate)}</span>
+                      <span>• {estimatedDays} jours</span>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className="flex items-center gap-1">
+                      <span>Livraison calculée</span>
+                      <span>• {estimatedDays} jours</span>
+                    </div>
+                  );
+                }
+              })()}
+            </div>
+          )}

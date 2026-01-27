@@ -78,7 +78,7 @@ router.get('/', async (req, res) => {
     }
 
     const products = await Product.find(query)
-      .populate('shopId', 'name')
+      .populate('shopId', 'name slug shippingConfig')
       .populate('sellerId', 'firstName lastName')
       .sort({ createdAt: -1 })
       .limit(limit * 1)

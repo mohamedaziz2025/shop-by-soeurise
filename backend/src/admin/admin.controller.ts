@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Put, Delete, Patch, Query, Body, Param, UseGuards, UseInterceptors, UploadedFiles, UploadedFile } from '@nestjs/common';
 import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
+import * as fs from 'fs';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
