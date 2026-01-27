@@ -130,7 +130,38 @@ class ApiClient {
 
   // Products
   async getProducts(filters?: any) {
-    const { data } = await this.client.get('/products', { params: filters });
+    // Sanitize filters to avoid sending empty strings or invalid types
+    const params: any = {};
+    if (filters) {
+      Object.keys(filters).forEach((k) => {
+        const v = (filters as any)[k];
+        if (v === undefined || v === null) return;
+        if (typeof v === 'string' && v.trim() === '') return;
+
+        // Convert numeric strings for min/max price
+        if ((k === 'minPrice' || k === 'maxPrice') && typeof v === 'string') {
+          const n = Number(v);
+          if (!Number.isNaN(n)) params[k] = n;
+          return;
+        }
+
+        // Convert boolean-like strings
+        if (k === 'isFeatured' && typeof v === 'string') {
+          if (v === 'true' || v === 'false') params[k] = v === 'true';
+          return;
+        }
+
+        // Tags: if comma-separated string, convert to array
+        if (k === 'tags' && typeof v === 'string') {
+          params[k] = v.split(',').map((s) => s.trim()).filter(Boolean);
+          return;
+        }
+
+        params[k] = v;
+      });
+    }
+
+    const { data } = await this.client.get('/products', { params });
     return data;
   }
 
