@@ -348,6 +348,10 @@ class ApiClient {
     return data;
   }
 
+  async getAdminStats() {
+    return this.getDashboardStats();
+  }
+
   async getDailySales(days: number = 7) {
     const { data } = await this.client.get('/admin/sales/daily', { params: { days } });
     return data;
