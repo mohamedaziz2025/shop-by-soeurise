@@ -36,11 +36,11 @@ export default function MarketplaceSidebar({
   };
 
   const sidebarContent = (
-    <div className="p-6">
-      <h2 className="text-xs uppercase tracking-widest font-black text-gray-400 mb-6">
+    <div className="p-4 md:p-6">
+      <h2 className="text-xs uppercase tracking-widest font-black text-gray-400 mb-4 md:mb-6">
         Univers
       </h2>
-      <nav className="space-y-3">
+      <nav className="space-y-2 md:space-y-3">
         {categories.map((cat) => (
           <div key={cat}>
             <button
@@ -48,7 +48,7 @@ export default function MarketplaceSidebar({
                 onCategorySelect(cat);
                 setMobileOpen(false);
               }}
-              className={`w-full text-left px-4 py-3 rounded-xl font-black text-lg transition-all duration-200 ${
+              className={`w-full text-left px-3 md:px-4 py-2.5 md:py-3 rounded-lg md:rounded-xl font-black text-base md:text-lg transition-all duration-200 ${
                 getColorClasses(selectedCategory === cat, cat)
               }`}
             >
@@ -57,9 +57,12 @@ export default function MarketplaceSidebar({
 
             {/* Shops sub-menu */}
             {selectedCategory === cat && shops.length > 0 && (
-              <div className="ml-6 mt-2 space-y-1.5">
+              <div className="ml-3 md:ml-6 mt-1.5 md:mt-2 space-y-1">
                 {shops.map((shop) => {
                   const isActive = selectedShop?._id === shop._id;
+                  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://72.62.71.97:3001';
+                  const logoUrl = shop.logo?.startsWith('http') ? shop.logo : shop.logo ? `${API_BASE}${shop.logo}` : null;
+                  
                   return (
                     <button
                       key={shop._id}
@@ -67,15 +70,29 @@ export default function MarketplaceSidebar({
                         onShopSelect(shop);
                         setMobileOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                      className={`w-full text-left px-2.5 md:px-3 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-medium transition-all duration-150 flex items-center gap-2 ${
                         isActive
                           ? `bg-gradient-to-r from-pink-50 to-pink-0 text-pink-700 border-l-2 border-pink-600 shadow-sm`
                           : `text-gray-600 hover:bg-gray-50 hover:text-pink-600 hover:border-l-2 hover:border-pink-300`
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <ChevronRight className={`w-3 h-3 transition-transform ${isActive ? 'text-pink-600' : ''}`} />
-                        {shop.name}
+                      {/* Shop Logo thumbnail */}
+                      {logoUrl && (
+                        <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
+                          <img
+                            src={logoUrl}
+                            alt={shop.name}
+                            className="object-contain w-full h-full p-0.5"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                        <ChevronRight className={`w-3 h-3 flex-shrink-0 transition-transform ${isActive ? 'text-pink-600' : ''}`} />
+                        <span className="truncate">{shop.name}</span>
                       </div>
                     </button>
                   );
@@ -93,10 +110,10 @@ export default function MarketplaceSidebar({
       {/* Mobile toggle button */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed bottom-6 left-6 z-40 bg-gradient-to-r from-pink-600 to-rose-500 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110"
+        className="lg:hidden fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 bg-gradient-to-r from-pink-600 to-rose-500 text-white p-2.5 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110"
         aria-label="Ouvrir les filtres"
       >
-        {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        {mobileOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
       </button>
 
       {/* Mobile overlay */}
@@ -110,11 +127,12 @@ export default function MarketplaceSidebar({
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:static lg:block inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 min-h-screen sticky top-0
+          fixed lg:static lg:block inset-y-0 left-0 z-40 w-56 sm:w-64 bg-white border-r border-gray-200 min-h-screen sticky top-0
           transform transition-transform duration-300 ease-in-out
           lg:translate-x-0
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           shadow-lg lg:shadow-none
+          overflow-y-auto
         `}
       >
         {sidebarContent}
