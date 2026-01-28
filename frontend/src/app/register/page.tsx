@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
@@ -8,7 +8,7 @@ import ModernLayout from '@/components/ModernLayout';
 import { Sparkles, UserPlus, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
@@ -300,6 +300,15 @@ export default function RegisterPage() {
           </p>
         </motion.div>
       </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <ModernLayout showFooter={false}>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
+        <RegisterContent />
+      </Suspense>
     </ModernLayout>
   );
 }
