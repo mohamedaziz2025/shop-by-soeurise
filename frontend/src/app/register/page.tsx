@@ -66,8 +66,7 @@ function RegisterContent() {
   };
 
   return (
-    <ModernLayout showFooter={false}>
-      <div className="min-h-screen flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -309,6 +308,9 @@ export default function RegisterPage() {
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
         <RegisterContent />
       </Suspense>
+    </ModernLayout>
+  );
+}
     </ModernLayout>
   );
 }
