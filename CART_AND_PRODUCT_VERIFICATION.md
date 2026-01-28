@@ -2,51 +2,63 @@
 
 ## Problèmes Identifiés
 
-### 1. **Affichage des images en détail produit**
+### 1. **Affichage des images en détail produit** ✅ CORRIGÉ
 **Location:** `frontend/src/app/product/[slug]/page.tsx`
-**Problème:** Les images utilisent `Next.js Image` qui peut avoir des problèmes de loading avec les URLs du serveur.
-**Détails:**
-- Ligne 154: Les images viennent directement du tableau `product?.images?.[selectedImage]`
-- Pas de gestion du prefixe URL du serveur API
-- Pas de fallback en cas d'erreur de chargement
+**Problème résolu:** 
+- ✅ Ajout de la fonction `getImageUrl()` (ligne 105-110)
+- ✅ Remplacement de `Next.js Image` par `<img>` natif
+- ✅ Ajout du gestionnaire d'erreur `onError` pour les images cassées
+- ✅ Support des URLs relatives et absolues
 
-**Solution proposée:**
+**Changements:**
 ```tsx
-// Ajouter une fonction getImageUrl() comme dans ProductCard
-const getImageUrl = (imgPath: string) => {
-  if (!imgPath) return '/placeholder-product.png';
-  if (imgPath.startsWith('http')) return imgPath;
-  return `http://72.62.71.97:3001${imgPath}`;
+const getImageUrl = (img: string | undefined) => {
+  if (!img) return '/placeholder-product.png';
+  if (img.startsWith('http')) return img;
+  return `http://72.62.71.97:3001${img}`;
 };
 
-// Puis l'utiliser:
-<Image src={getImageUrl(product?.images?.[selectedImage])} ... />
+<img
+  src={getImageUrl(product?.images?.[selectedImage])}
+  alt={product?.name || 'Produit'}
+  className="w-full h-full object-cover"
+  onError={(e) => {
+    (e.target as HTMLImageElement).src = '/placeholder-product.png';
+  }}
+/>
 ```
 
 ---
 
-### 2. **Cart - Champ image incorrect**
-**Location:** `frontend/src/app/cart/page.tsx`
-**Problème:** Ligne 168 utilise `item.product.mainImage` mais le product a plutôt un array `images`.
-**Détails:**
-- `item.product.mainImage` n'existe pas dans le schema
-- Devrait utiliser `item.product.mainImage` OU `item.product.images?.[0]`
-- Les images ne s'affichent pas correctement dans le cart
+### 2. **Cart - Gestion d'images** ✅ CORRIGÉ
+**Location:** `frontend/src/app/cart/page.tsx` (ligne 171-180)
+**Problème résolu:**
+- ✅ Remplacement de `Next.js Image` par `<img>` natif
+- ✅ Ajout de la logique URL avec `API_BASE`
+- ✅ Support URLs relatives ET absolutes
+- ✅ Fallback pour images cassées
 
-**Solution proposée:**
+**Changements:**
 ```tsx
-// Remplacer ligne 168:
-const productImage = item.product.mainImage || item.product.images?.[0] || '/placeholder-product.png';
-const imageUrl = productImage?.startsWith('http') 
-  ? productImage 
-  : `${API_BASE}${productImage}`;
-
-<Image src={imageUrl} alt={item.product.name} fill className="object-cover" />
+<img
+  src={
+    item.product.mainImage
+      ? item.product.mainImage.startsWith('http')
+        ? item.product.mainImage
+        : `${API_BASE}${item.product.mainImage}`
+      : '/placeholder-product.png'
+  }
+  alt={item.product.name}
+  className="w-full h-full object-cover"
+  onError={(e) => {
+    (e.target as HTMLImageElement).src = '/placeholder-product.png';
+  }}
+/>
 ```
 
 ---
 
-### 3. **ProductCard - Images sans gestion d'erreur complete**
+### 3. **ProductCard - Images** ✅ FONCTIONNEL
 **Location:** `frontend/src/components/ProductCard.tsx`
 **Problème:** Gère `imageError` mais seulement affiche un emoji
 **Détails:**
