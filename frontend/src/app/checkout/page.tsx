@@ -6,6 +6,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { api } from '@/lib/api';
 import { useCartStore } from '@/store/cart';
+import { useAuthStore } from '@/store/auth';
 import { formatPrice } from '@/lib/utils';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Lock, ShoppingBag } from 'lucide-react';
@@ -81,13 +82,27 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, fetchCart } = useCartStore();
+  const { isAuthenticated, isLoading: authLoading } = useAuthStore();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Vérifier l'authentification avant d'initialiser le checkout
   useEffect(() => {
+    // Si l'authentification est en cours, attendre
+    if (authLoading) {
+      return;
+    }
+
+    // Si l'utilisateur n'est pas authentifié, le rediriger vers la connexion
+    if (!isAuthenticated) {
+      router.push('/login?redirect=checkout');
+      return;
+    }
+
+    // Sinon, initialiser le checkout
     initializeCheckout();
-  }, []);
+  }, [isAuthenticated, authLoading, router]);
 
   const initializeCheckout = async () => {
     setLoading(true);

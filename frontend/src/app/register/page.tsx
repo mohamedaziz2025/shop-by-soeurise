@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
 import ModernLayout from '@/components/ModernLayout';
@@ -10,6 +10,7 @@ import Link from 'next/link';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -48,8 +49,15 @@ export default function RegisterPage() {
         phone: formData.phone,
       });
 
-      // Rediriger vers login avec message de succès
-      router.push('/login?registered=true');
+      // Récupérer le paramètre redirect s'il existe
+      const redirectTo = searchParams.get('redirect');
+      
+      // Rediriger vers login avec message de succès et le paramètre redirect
+      if (redirectTo === 'checkout') {
+        router.push('/login?registered=true&redirect=checkout');
+      } else {
+        router.push('/login?registered=true');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erreur lors de l\'inscription');
     } finally {

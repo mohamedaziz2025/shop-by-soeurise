@@ -23,8 +23,13 @@ function LoginPageContent() {
 
   useEffect(() => {
     if (user) {
-      // Rediriger vers le dashboard approprié selon le rôle
-      if (user.role === 'SELLER') {
+      // Vérifier s'il y a un paramètre redirect (ex: checkout)
+      const redirectTo = searchParams.get('redirect');
+      
+      // Rediriger vers le dashboard approprié selon le rôle, ou vers la page spécifiée
+      if (redirectTo === 'checkout') {
+        router.push('/checkout');
+      } else if (user.role === 'SELLER') {
         router.push('/seller/dashboard');
       } else if (user.role === 'ADMIN') {
         router.push('/admin/dashboard');
@@ -32,7 +37,7 @@ function LoginPageContent() {
         router.push('/dashboard');
       }
     }
-  }, [user, router]);
+  }, [user, router, searchParams]);
 
   useEffect(() => {
     // Vérifier les paramètres d'URL
@@ -51,19 +56,26 @@ function LoginPageContent() {
     try {
       const response = await api.login(formData.email, formData.password);
       setAuth(response.accessToken, response.refreshToken, response.user);
-        // If a guest cart exists, merge it into the authenticated user's cart
-        if (typeof window !== 'undefined') {
-          const guestId = localStorage.getItem('guestId');
-          if (guestId) {
-            try {
-              await api.mergeGuestCart(guestId);
-            } catch (err) {
-              console.warn('Impossible de fusionner le panier invité:', err);
-            }
+      
+      // Fusionner le panier invité si exists
+      if (typeof window !== 'undefined') {
+        const guestId = localStorage.getItem('guestId');
+        if (guestId) {
+          try {
+            await api.mergeGuestCart(guestId);
+          } catch (err) {
+            console.warn('Impossible de fusionner le panier invité:', err);
           }
         }
-      // Rediriger vers le dashboard approprié
-      if (response.user.role === 'SELLER') {
+      }
+      
+      // Vérifier s'il y a un paramètre redirect (ex: checkout)
+      const redirectTo = searchParams.get('redirect');
+      
+      if (redirectTo === 'checkout') {
+        // Rediriger vers le checkout
+        router.push('/checkout');
+      } else if (response.user.role === 'SELLER') {
         router.push('/seller/dashboard');
       } else if (response.user.role === 'ADMIN') {
         router.push('/admin/dashboard');
@@ -209,7 +221,7 @@ function LoginPageContent() {
 
               <div className="mt-6">
                 <Link
-                  href="/register"
+                  href={`/register${searchParams.get('redirect') ? `?redirect=${searchParams.get('redirect')}` : ''}`}
                   className="w-full flex justify-center py-4 px-6 border-2 border-pink-600 rounded-2xl text-pink-600 font-bold hover:bg-pink-50 transition-all"
                 >
                   Créer un compte
